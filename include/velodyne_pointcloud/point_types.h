@@ -1,25 +1,8 @@
-/* -*- mode: C++ -*-
- *
- *  Copyright (C) 2011, 2012 Austin Robot Technology
- *
- *  License: Modified BSD Software License Agreement
- *
- *  $Id: data_base.h 1554 2011-06-14 22:11:17Z jack.oquin $
- */
-
-/** \file
- *
- *  Point Cloud Library point structures for Velodyne data.
- *
- *  @author Jesse Vera
- *  @author Jack O'Quin
- *  @author Piyush Khandelwal
- */
-
-#ifndef __VELODYNE_POINTCLOUD_POINT_TYPES_H
-#define __VELODYNE_POINTCLOUD_POINT_TYPES_H
+#ifndef VELODYNE_POINTCLOUD_POINT_TYPES_H
+#define VELODYNE_POINTCLOUD_POINT_TYPES_H
 
 #include <pcl/point_types.h>
+#include <cstdint>
 
 namespace velodyne_pointcloud
 {
@@ -27,24 +10,23 @@ namespace velodyne_pointcloud
   struct PointXYZIR
   {
     PCL_ADD_POINT4D;                    // quad-word XYZ
-    float    intensity;                 ///< laser intensity reading
-    std::uint16_t ring;                      ///< laser ring number
-    EIGEN_MAKE_ALIGNED_OPERATOR_NEW     // ensure proper alignment
+    float intensity;                     ///< laser intensity reading
+    std::uint16_t ring;                  ///< laser ring number
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW      // ensure proper alignment
   } EIGEN_ALIGN16;
 
-    /** Euclidean Velodyne coordinate, including intensity, ring number, distance and rotation. */
-    struct PointXYZIDRA
-    {
-        PCL_ADD_POINT4D;                    // quad-word XYZ
-        float    intensity;                 ///< laser intensity reading
-        float    distance;
-        std::uint16_t ring;                      ///< laser ring number
-        std::uint16_t azimuth;                      ///< laser rotation
-        EIGEN_MAKE_ALIGNED_OPERATOR_NEW     // ensure proper alignment
-    } EIGEN_ALIGN16;
+  /** Euclidean Velodyne coordinate, including intensity, ring number, distance, and rotation. */
+  struct PointXYZIDRA
+  {
+    PCL_ADD_POINT4D;                     // quad-word XYZ
+    float intensity;                      ///< laser intensity reading
+    float distance;
+    std::uint16_t ring;                   ///< laser ring number
+    std::uint16_t azimuth;                ///< laser rotation
+    EIGEN_MAKE_ALIGNED_OPERATOR_NEW       // ensure proper alignment
+  } EIGEN_ALIGN16;
 
-}; // namespace velodyne_pointcloud
-
+} // namespace velodyne_pointcloud
 
 POINT_CLOUD_REGISTER_POINT_STRUCT(velodyne_pointcloud::PointXYZIR,
                                   (float, x, x)
@@ -55,12 +37,11 @@ POINT_CLOUD_REGISTER_POINT_STRUCT(velodyne_pointcloud::PointXYZIR,
 
 POINT_CLOUD_REGISTER_POINT_STRUCT(velodyne_pointcloud::PointXYZIDRA,
                                   (float, x, x)
-                                          (float, y, y)
-                                          (float, z, z)
-                                          (float, intensity, intensity)
-                                          (float, distance, distance)
-                                          (std::uint16_t, ring, ring)
-                                          (std::uint16_t, azimuth, azimuth))
+                                  (float, y, y)
+                                  (float, z, z)
+                                  (float, intensity, intensity)
+                                  (float, distance, distance)
+                                  (std::uint16_t, ring, ring)
+                                  (std::uint16_t, azimuth, azimuth))
 
-#endif // __VELODYNE_POINTCLOUD_POINT_TYPES_H
-
+#endif // VELODYNE_POINTCLOUD_POINT_TYPES_H
