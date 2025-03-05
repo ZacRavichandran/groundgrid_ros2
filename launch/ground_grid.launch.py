@@ -6,7 +6,7 @@ from launch.actions import DeclareLaunchArgument
 def generate_launch_description():
     return launch.LaunchDescription([
         DeclareLaunchArgument(
-            'point_cloud_topic',
+            '/ouster/points',
             default_value='/sensors/velodyne_points',
             description='Point cloud topic to subscribe to'
         ),
@@ -15,20 +15,23 @@ def generate_launch_description():
             default_value='false',
             description='Use nodelets (not applicable in ROS 2)'
         ),
-        DeclareLaunchArgument(
-            'nodelet_manager',
-            default_value='core_nodelet_manager',
-            description='Nodelet manager (not applicable in ROS 2)'
-        ),
 
-        # Remap topic
-        launch_ros.actions.Node(
-            package='groundgrid',
-            executable='groundgrid_node',
-            name='groundgrid',
-            remappings=[
-                ('/sensors/velodyne_points', LaunchConfiguration('point_cloud_topic'))
-            ],
-            condition=launch.conditions.UnlessCondition(LaunchConfiguration('use_nodelets'))
+        # Component container
+        launch_ros.actions.ComposableNodeContainer(
+            name='groundgrid_container',
+            package='rclcpp_components',
+            executable='component_container',
+            namespace='',
+            output='screen',
+            composable_node_descriptions=[
+                launch_ros.descriptions.ComposableNode(
+                    package='groundgrid',
+                    plugin='groundgrid::GroundGridNode',
+                    name='groundgrid_node',
+                    remappings=[
+                        ('/sensors/velodyne_points', LaunchConfiguration('point_cloud_topic'))
+                    ]
+                )
+            ]
         ),
     ])
