@@ -14,7 +14,7 @@
 // ros opencv transport
 #include <image_transport/image_transport.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <cv_bridge/cv_bridge.h>
+#include <cv_bridge/cv_bridge.hpp>
 
 // ros tf
 #include <tf2_ros/transform_listener.h>
