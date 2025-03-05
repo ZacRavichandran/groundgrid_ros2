@@ -28,7 +28,8 @@ find_package(OpenCV REQUIRED)
 find_package(PCL REQUIRED COMPONENTS common)
 find_package(Eigen3 REQUIRED)
 
-include_directories(include)
+include_directories(include
+                    ${OpenCV_INCLUDE_DIRS})
 
 add_library(${PROJECT_NAME}_lib
     src/GroundGrid.cpp
