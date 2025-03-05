@@ -54,7 +54,7 @@ public:
             std::bind(&GroundGridNode::odom_callback, this, std::placeholders::_1)
         );
         points_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-            "/sensors/velodyne_points", 1, 
+            "/ouster/points", 1, 
             std::bind(&GroundGridNode::points_callback, this, std::placeholders::_1)
         );
     }

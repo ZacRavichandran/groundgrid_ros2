@@ -74,7 +74,7 @@ target_link_libraries(${PROJECT_NAME}_groundsegmentation_lib
 )
 
 
-add_library(groundgrid_component src/GroundGridNode.cpp)
+add_library(groundgrid_component SHARED src/GroundGridNode.cpp)
 ament_target_dependencies(groundgrid_component
     rclcpp
     rclcpp_components
