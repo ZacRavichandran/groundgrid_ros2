@@ -5,11 +5,14 @@ from launch.actions import DeclareLaunchArgument
 
 def generate_launch_description():
     return launch.LaunchDescription([
+        # Declare the point_cloud_topic argument
         DeclareLaunchArgument(
-            '/ouster/points',
-            default_value='/sensors/velodyne_points',
+            'point_cloud_topic',
+            default_value='/ouster/points',
             description='Point cloud topic to subscribe to'
         ),
+        
+        # Declare the use_nodelets argument (if necessary)
         DeclareLaunchArgument(
             'use_nodelets',
             default_value='false',
