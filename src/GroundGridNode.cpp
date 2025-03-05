@@ -9,7 +9,6 @@
 #include <pcl/point_types.h>
 #include <pcl_conversions/pcl_conversions.h>
 #include <velodyne_pointcloud/point_types.h>
-#include <pcl_ros/point_cloud.hpp>
 
 // ros opencv transport
 #include <image_transport/image_transport.hpp>
