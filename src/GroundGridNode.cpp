@@ -164,8 +164,7 @@ protected:
         RCLCPP_INFO(this->get_logger(), "groundgrid took %.3f ms (avg: %.3f ms)", milliseconds, avg_time);
         RCLCPP_DEBUG(this->get_logger(), "total cpu time used: %.3f ms (avg: %.3f ms)", c_millis, avg_cpu_time);
 
-        grid_map_msgs::msg::GridMap grid_map_msg;
-        grid_map::GridMapRosConverter::toMessage(*map_ptr_, grid_map_msg);
+        grid_map_msgs::msg::GridMap grid_map_msg = *grid_map::GridMapRosConverter::toMessage(*map_ptr_);
         grid_map_msg.header.stamp = cloud_msg->header.stamp;
         grid_map_pub_->publish(grid_map_msg);
 
@@ -174,11 +173,11 @@ protected:
             if(layer_pubs_.find(layer) == layer_pubs_.end()){
                 layer_pubs_[layer] = it.advertise("/groundgrid/grid_map_cv_" + layer, 1);
             }
-            publish_grid_map_layer(layer_pubs_.at(layer), layer, cloud_msg->header.seq, cloud_msg->header.stamp);
+            publish_grid_map_layer(layer_pubs_.at(layer), layer, cloud_msg->header.stamp);
         }
 
         if(terrain_im_pub_.getNumSubscribers()){
-            publish_grid_map_layer(*terrain_im_pub_, "terrain", cloud_msg->header.seq, cloud_msg->header.stamp);
+            publish_grid_map_layer(terrain_im_pub_, "terrain", cloud_msg->header.stamp);
         }
 
         end = std::chrono::steady_clock::now();
@@ -186,7 +185,7 @@ protected:
     }
 
     void publish_grid_map_layer(const image_transport::Publisher &pub, const std::string &layer_name,
-        const int seq = 0, const rclcpp::Time &stamp = rclcpp::Clock().now()) {
+        const rclcpp::Time &stamp = rclcpp::Clock().now()) {
 
         cv::Mat img, normalized_img, color_img, mask;
 
@@ -239,7 +238,7 @@ protected:
                 tf2::doTransform(ps, ps, baseToUtmTransform);
 
                 auto msg = cv_bridge::CvImage(std_msgs::msg::Header(), "32FC3", img).toImageMsg();
-                msg->header.frame_id = std::to_string(seq) + "_" + std::to_string(ps.point.x) + "_" + std::to_string(ps.point.y);
+                msg->header.frame_id = std::to_string(ps.point.x) + "_" + std::to_string(ps.point.y);
                 pub.publish(msg);
             }
         }

@@ -351,7 +351,7 @@ void GroundSegmentation::detect_ground_patch(grid_map::GridMap& map, size_t i, s
 
     // Do not update known high confidence estimations upward
     if (oldConfidence > 0.5 && groundlevel >= oldGroundheight + mConfig.outlier_tolerance) {
-        RCLCPP_DEBUG(this->get_logger(), "Skipping patch at (%zu, %zu), high confidence ground level detected.", i, j);
+        RCLCPP_DEBUG(rclcpp::get_logger("GroundSegmentation"), "Skipping patch at (%zu, %zu), high confidence ground level detected.", i, j);
         return;
     }
 
@@ -369,7 +369,7 @@ void GroundSegmentation::detect_ground_patch(grid_map::GridMap& map, size_t i, s
         oldConfidence = std::min(oldConfidence + 0.1f, 0.5f);
     }
 
-    RCLCPP_DEBUG(this->get_logger(), "Updated patch at (%zu, %zu), ground height: %f, confidence: %f", i, j, oldGroundheight, oldConfidence);
+    RCLCPP_DEBUG(rclcpp::get_logger("GroundSegmentation"), "Updated patch at (%zu, %zu), ground height: %f, confidence: %f", i, j, oldGroundheight, oldConfidence);
 }
 
 void GroundSegmentation::spiral_ground_interpolation(grid_map::GridMap &map, const geometry_msgs::msg::TransformStamped &toBase) const
@@ -389,7 +389,7 @@ void GroundSegmentation::spiral_ground_interpolation(grid_map::GridMap &map, con
     try {
         tf2::doTransform(ps, ps, toBase);
     } catch (const tf2::TransformException &ex) {
-        RCLCPP_ERROR(this->get_logger(), "Transform failed: %s", ex.what());
+        RCLCPP_ERROR(rclcpp::get_logger("GroundSegmentation"), "Transform failed: %s", ex.what());
         return;
     }
 
