@@ -196,91 +196,91 @@ void GroundSegmentation::insert_cloud(const pcl::PointCloud<PCLPoint>::Ptr cloud
 
     for (size_t i = start; i < end; ++i)
     {
-    const PCLPoint& point = cloud->points[i];
-    const auto& pos = grid_map::Position(point.x, point.y);
-    const float sqdist = std::pow(point.x - cloudOrigin.x, 2.0) + std::pow(point.y - cloudOrigin.y, 2.0);
+        const PCLPoint& point = cloud->points[i];
+        const auto& pos = grid_map::Position(point.x, point.y);
+        const float sqdist = std::pow(point.x - cloudOrigin.x, 2.0) + std::pow(point.y - cloudOrigin.y, 2.0);
 
-    bool toSkip = false;
+        bool toSkip = false;
 
-    grid_map::Index gi;
-    map.getIndex(pos, gi);
+        grid_map::Index gi;
+        map.getIndex(pos, gi);
 
-    if (!map.isInside(pos))
-    continue;
+        if (!map.isInside(pos))
+            continue;
 
-    // point count map used for evaluation
-    gpr(gi(0), gi(1)) += 1.0f;
+        // point count map used for evaluation
+        gpr(gi(0), gi(1)) += 1.0f;
 
-    if (point.ring > mConfig.max_ring || sqdist < minDistSquared) {
-    ignored.push_back(std::make_pair(i, gi));
-    continue;
+        if (point.ring > mConfig.max_ring || sqdist < minDistSquared) {
+            ignored.push_back(std::make_pair(i, gi));
+            continue;
+        }
+
+        // Outlier detection test
+        const float oldgroundheight = ggl(gi(0), gi(1));
+        if (point.z < oldgroundheight - 0.2) {
+            // get direction
+            PCLPoint vec;
+            vec.x = point.x - cloudOrigin.x;
+            vec.y = point.y - cloudOrigin.y;
+            vec.z = point.z - cloudOrigin.z;
+
+            float len = std::sqrt(std::pow(vec.x, 2.0f) + std::pow(vec.y, 2.0f) + std::pow(vec.z, 2.0f));
+            vec.x /= len;
+            vec.y /= len;
+            vec.z /= len;
+
+            // check for occlusion
+            for (int step = 3; (std::pow(step * vec.x, 2.0) + std::pow(step * vec.y, 2.0) + std::pow(step * vec.z, 2.0)) < std::pow(len, 2.0) && vec.z < -0.01f; ++step) {
+                grid_map::Index intersection, pointPosIndex;
+                grid_map::Position intersecPos(step * (vec.x) + cloudOrigin.x, step * (vec.y) + cloudOrigin.y);
+                map.getIndex(intersecPos, intersection);
+
+                // Check if inside map borders
+                if (intersection(0) <= 0 || intersection(1) <= 0 || intersection(0) >= size(0) - 1 || intersection(1) >= size(1) - 1)
+                    continue;
+
+                // check if known ground occludes the line of sight
+                const auto& block = ggp.block<3, 3>(std::max(intersection(0) - 1, 2), std::max(intersection(1) - 1, 2));
+                if (block.sum() > mConfig.min_outlier_detection_ground_confidence && ggp(intersection(0), intersection(1)) > 0.01f && ggl(intersection(0), intersection(1)) >= step * vec.z + cloudOrigin.z + mConfig.outlier_tolerance) {
+                    outliers.push_back(i);
+                    toSkip = true;
+                    break;
+                }
+            }
+        }
+
+        if (toSkip)
+            continue;
+
+        float& groundheight = gmg(gi(0), gi(1));
+        float& mean = gmm(gi(0), gi(1));
+
+        float planeDist = 0.0;
+        point_index.push_back(std::make_pair(i, gi));
+
+        float& points = gpl(gi(0), gi(1));
+        float& maxHeight = gmx(gi(0), gi(1));
+        float& minHeight = gmi(gi(0), gi(1));
+        float& planeDistMap = gmd(gi(0), gi(1));
+        float& m2 = gm2(gi(0), gi(1));
+
+        planeDist = point.z - cloudOrigin.z;
+        groundheight = (point.z + points * groundheight) / (points + 1.0);
+
+        if (mean == 0.0)
+            mean = planeDist;
+        if (!std::isnan(planeDist)) {
+            float delta = planeDist - mean;
+            mean += delta / (points + 1);
+            planeDistMap = (planeDist + points * planeDistMap) / (points + 1.0);
+            m2 += delta * (planeDist - mean);
+        }
+
+        maxHeight = std::max(maxHeight, point.z);
+        minHeight = std::min(minHeight, point.z - 0.0001f); // to make sure maxHeight > minHeight
+        points += 1.0;
     }
-
-    // Outlier detection test
-    const float oldgroundheight = ggl(gi(0), gi(1));
-    if (point.z < oldgroundheight - 0.2) {
-    // get direction
-    PCLPoint vec;
-    vec.x = point.x - cloudOrigin.x;
-    vec.y = point.y - cloudOrigin.y;
-    vec.z = point.z - cloudOrigin.z;
-
-    float len = std::sqrt(std::pow(vec.x, 2.0f) + std::pow(vec.y, 2.0f) + std::pow(vec.z, 2.0f));
-    vec.x /= len;
-    vec.y /= len;
-    vec.z /= len;
-
-    // check for occlusion
-    for (int step = 3; (std::pow(step * vec.x, 2.0) + std::pow(step * vec.y, 2.0) + std::pow(step * vec.z, 2.0)) < std::pow(len, 2.0) && vec.z < -0.01f; ++step) {
-    grid_map::Index intersection, pointPosIndex;
-    grid_map::Position intersecPos(step * (vec.x) + cloudOrigin.x, step * (vec.y) + cloudOrigin.y);
-    map.getIndex(intersecPos, intersection);
-
-    // Check if inside map borders
-    if (intersection(0) <= 0 || intersection(1) <= 0 || intersection(0) >= size(0) - 1 || intersection(1) >= size(1) - 1)
-    continue;
-
-    // check if known ground occludes the line of sight
-    const auto& block = ggp.block<3, 3>(std::max(intersection(0) - 1, 2), std::max(intersection(1) - 1, 2));
-    if (block.sum() > mConfig.min_outlier_detection_ground_confidence && ggp(intersection(0), intersection(1)) > 0.01f && ggl(intersection(0), intersection(1)) >= step * vec.z + cloudOrigin.z + mConfig.outlier_tolerance) {
-    outliers.push_back(i);
-    toSkip = true;
-    break;
-    }
-    }
-    }
-
-    if (toSkip)
-    continue;
-
-    float& groundheight = gmg(gi(0), gi(1));
-    float& mean = gmm(gi(0), gi(1));
-
-    float planeDist = 0.0;
-    point_index.push_back(std::make_pair(i, gi));
-
-    float& points = gpl(gi(0), gi(1));
-    float& maxHeight = gmx(gi(0), gi(1));
-    float& minHeight = gmi(gi(0), gi(1));
-    float& planeDistMap = gmd(gi(0), gi(1));
-    float& m2 = gm2(gi(0), gi(1));
-
-    planeDist = point.z - cloudOrigin.z;
-    groundheight = (point.z + points * groundheight) / (points + 1.0);
-
-    if (mean == 0.0)
-    mean = planeDist;
-    if (!std::isnan(planeDist)) {
-    float delta = planeDist - mean;
-    mean += delta / (points + 1);
-    planeDistMap = (planeDist + points * planeDistMap) / (points + 1.0);
-    m2 += delta * (planeDist - mean);
-    }
-
-    maxHeight = std::max(maxHeight, point.z);
-    minHeight = std::min(minHeight, point.z - 0.0001f); // to make sure maxHeight > minHeight
-    points += 1.0;
-}
 }
 
 void GroundSegmentation::detect_ground_patches(grid_map::GridMap& map, unsigned short section) const
@@ -446,10 +446,5 @@ void GroundSegmentation::interpolate_cell(grid_map::GridMap &map, const size_t x
 
     // Only update confidence in cells above min distance
     if ((std::pow(static_cast<float>(x) - center_idx, 2.0) + std::pow(static_cast<float>(y) - center_idx, 2.0)) * std::pow(map.getResolution(), 2.0f) > minDistSquared)
-        occupied = std::max(occupied - occupied / mConfig.occupied_cells_decrease_factor, 0.001f);
-}
-
-void GroundSegmentation::setConfig(const groundgrid::GroundGridConfig &config)
-{
-    mConfig = config;
+        occupied = std::max(occupied - occupied / mConfig.occupied_cells_decrease_factor, 0.001);
 }

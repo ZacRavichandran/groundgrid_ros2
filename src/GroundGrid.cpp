@@ -19,8 +19,6 @@ public:
 
     ~GroundGrid() {}
 
-    void setConfig(groundgrid::GroundGridConfig &config) { config_ = config; }
-
     void initGroundGrid(const std::shared_ptr<nav_msgs::msg::Odometry> &inOdom) {
         std::chrono::_V2::steady_clock::time_point start = std::chrono::steady_clock::now();
 
@@ -119,7 +117,6 @@ private:
     tf2_ros::Buffer tf_buffer_;
     tf2_ros::TransformListener tf_listener_;
 
-    groundgrid::GroundGridConfig config_;
     std::shared_ptr<grid_map::GridMap> mMap_ptr;
     geometry_msgs::msg::PoseWithCovarianceStamped mLastPose;
 

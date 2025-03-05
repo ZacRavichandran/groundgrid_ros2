@@ -14,16 +14,13 @@
 #include <geometry_msgs/msg/point_stamped.hpp>
 #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
-#include <groundgrid/GroundGridConfig.h>
-
 namespace groundgrid {
 
 class GroundGrid {
-   public:
+public:
     GroundGrid();
 
     virtual ~GroundGrid();
-    void setConfig(groundgrid::GroundGridConfig & config);
     void initGroundGrid(const nav_msgs::msg::Odometry::SharedPtr inOdom);
     
     std::shared_ptr<grid_map::GridMap> update(const nav_msgs::msg::Odometry::SharedPtr inOdom);
@@ -31,9 +28,7 @@ class GroundGrid {
     const float mResolution = .33f;
     const float mDimension = 120.0f;
 
-   private:
-    groundgrid::GroundGridConfig config_;
-
+private:
     tf2_ros::Buffer mTfBuffer;
     tf2_ros::TransformListener mTf2_listener;
 

@@ -14,20 +14,19 @@
 // ros opencv transport
 #include <image_transport/image_transport.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <cv_bridge/cv_bridge.hpp>
+#include <cv_bridge/cv_bridge.h>
 
 // ros tf
-#include <tf2_ros/transform_listener.hpp>
+#include <tf2_ros/transform_listener.h>
 
 // grid map
 #include <grid_map_msgs/msg/grid_map.hpp>
 #include <grid_map_ros/grid_map_ros.hpp>
 #include <grid_map_cv/grid_map_cv.hpp>
 
-#include <groundgrid/GroundGrid.hpp>
-#include <groundgrid/GroundGridConfig.hpp>
-#include <groundgrid/GroundGridFwd.hpp>
-#include <groundgrid/GroundSegmentation.hpp>
+#include <groundgrid/GroundGrid.h>
+#include <groundgrid/GroundGridFwd.h>
+#include <groundgrid/GroundSegmentation.h>
 
 namespace groundgrid {
 
@@ -36,9 +35,10 @@ class GroundGridNode : public rclcpp::Node {
 public:
     typedef velodyne_pointcloud::PointXYZIR PCLPoint;
 
-    GroundGridNode(const rclcpp::NodeOptions & options) : Node("groundgrid_node"), mTfListener(mTfBuffer) {
+    GroundGridNode(const rclcpp::NodeOptions & options) : Node("groundgrid_node"), 
+    mTfBuffer_(this->get_clock()), mTfListener_(mTfBuffer_) {
         // Initialize publishers and subscribers
-        image_transport::ImageTransport it(this);
+        image_transport::ImageTransport it(shared_from_this());
         grid_map_cv_img_pub_ = it.advertise("groundgrid/grid_map_cv", 1);
         terrain_im_pub_ = it.advertise("groundgrid/terrain", 1);
         grid_map_pub_ = this->create_publisher<grid_map_msgs::msg::GridMap>("groundgrid/grid_map", 1);
@@ -46,10 +46,8 @@ public:
 
         groundgrid_ = std::make_shared<GroundGrid>();
 
-        // Remove dynamic reconfigure (ROS 2 doesn't support dynamic_reconfigure, consider alternatives)
-
         // Initialize other components (if necessary)
-        ground_segmentation_.init(this, groundgrid_->mDimension, groundgrid_->mResolution);
+        ground_segmentation_.init(shared_from_this(), groundgrid_->mDimension, groundgrid_->mResolution);
 
         // Subscribe to topics
         pos_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
@@ -85,8 +83,8 @@ protected:
             return;
 
         try {
-            mapToBaseTransform = tf_buffer_->lookup_transform("map", "base_link", cloud_msg->header.stamp, rclcpp::Duration(0.0));
-            cloudOriginTransform = tf_buffer_->lookup_transform("map", "velodyne", cloud_msg->header.stamp, rclcpp::Duration(0.0));
+            mapToBaseTransform = mTfBuffer_.lookupTransform("map", "base_link", tf2::TimePointZero);
+            cloudOriginTransform = mTfBuffer_.lookupTransform("map", "velodyne", tf2::TimePointZero);
         }
         catch (const tf2::TransformException &ex) {
             RCLCPP_WARN(this->get_logger(), "Received point cloud but transforms are not available: %s", ex.what());
@@ -111,8 +109,8 @@ protected:
             transformed_cloud->points.reserve(cloud->points.size());
 
             try {
-                tf_buffer_->can_transform("map", cloud_msg->header.frame_id, cloud_msg->header.stamp, rclcpp::Duration(0.0));
-                transformStamped = tf_buffer_->lookup_transform("map", cloud_msg->header.frame_id, cloud_msg->header.stamp, rclcpp::Duration(0.0));
+                mTfBuffer_.canTransform("map", cloud_msg->header.frame_id, tf2::TimePointZero);
+                transformStamped = mTfBuffer_.lookupTransform("map", cloud_msg->header.frame_id, tf2::TimePointZero);
             }
             catch (const tf2::TransformException &ex) {
                 RCLCPP_WARN(this->get_logger(), "Failed to get map transform for point cloud transformation: %s", ex.what());
@@ -168,10 +166,10 @@ protected:
 
         grid_map_msgs::msg::GridMap grid_map_msg;
         grid_map::GridMapRosConverter::toMessage(*map_ptr_, grid_map_msg);
-        grid_map_msg.info.header.stamp = cloud_msg->header.stamp;
+        grid_map_msg.header.stamp = cloud_msg->header.stamp;
         grid_map_pub_->publish(grid_map_msg);
 
-        image_transport::ImageTransport it(*this);
+        image_transport::ImageTransport it(shared_from_this());
         for(const auto& layer : map_ptr_->getLayers()){
             if(layer_pubs_.find(layer) == layer_pubs_.end()){
                 layer_pubs_[layer] = it.advertise("/groundgrid/grid_map_cv_" + layer, 1);
@@ -179,7 +177,7 @@ protected:
             publish_grid_map_layer(layer_pubs_.at(layer), layer, cloud_msg->header.seq, cloud_msg->header.stamp);
         }
 
-        if(terrain_im_pub_->get_num_subscribers()){
+        if(terrain_im_pub_.getNumSubscribers()){
             publish_grid_map_layer(*terrain_im_pub_, "terrain", cloud_msg->header.seq, cloud_msg->header.stamp);
         }
 
@@ -192,7 +190,7 @@ protected:
 
         cv::Mat img, normalized_img, color_img, mask;
 
-        if (pub.get_num_subscribers() > 0) {
+        if (pub.getNumSubscribers() > 0) {
             if (layer_name != "terrain") {
                 const auto &map = *map_ptr_;
                 grid_map::GridMapCvConverter::toImage<unsigned char, 1>(map, layer_name, CV_8UC1, img);
@@ -229,7 +227,7 @@ protected:
                 geometry_msgs::msg::TransformStamped baseToUtmTransform;
 
                 try {
-                    baseToUtmTransform = mTfBuffer.lookupTransform("utm", "base_link", stamp, rclcpp::Duration(0, 0));
+                    baseToUtmTransform = mTfBuffer_.lookupTransform("utm", "base_link", tf2::TimePointZero);
                 } catch (const tf2::TransformException &ex) {
                     RCLCPP_WARN(rclcpp::get_logger("rclcpp"), "%s", ex.what());
                     return;
@@ -250,12 +248,12 @@ protected:
 private:
     /// subscriber
     rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr points_sub_;
-    rclcpp::Subscription<geometry_msgs::msg::PoseStamped>::SharedPtr pos_sub_;
+    rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr pos_sub_;
 
     /// publisher
     image_transport::Publisher grid_map_cv_img_pub_;
     image_transport::Publisher terrain_im_pub_;
-    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr grid_map_pub_;
+    rclcpp::Publisher<grid_map_msgs::msg::GridMap>::SharedPtr grid_map_pub_;
     rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr filtered_cloud_pub_;
     std::unordered_map<std::string, image_transport::Publisher> layer_pubs_;
 
@@ -269,8 +267,8 @@ private:
     GroundSegmentation ground_segmentation_;
 
     /// tf stuff
-    tf2_ros::Buffer mTfBuffer;
-    tf2_ros::TransformListener mTfListener;
+    tf2_ros::Buffer mTfBuffer_;
+    tf2_ros::TransformListener mTfListener_;
 };
 }
 

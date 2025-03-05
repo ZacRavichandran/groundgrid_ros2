@@ -20,9 +20,9 @@ find_package(pcl_conversions REQUIRED)
 find_package(grid_map_core REQUIRED)
 find_package(grid_map_ros REQUIRED)
 find_package(grid_map_cv REQUIRED)
-find_package(grid_map_loader REQUIRED)
+# find_package(grid_map_loader REQUIRED)
 find_package(grid_map_msgs REQUIRED)
-find_package(grid_map_rviz_plugin REQUIRED)
+# find_package(grid_map_rviz_plugin REQUIRED)
 find_package(grid_map_visualization REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(PCL REQUIRED COMPONENTS common)
@@ -33,7 +33,21 @@ include_directories(include)
 add_library(${PROJECT_NAME}_lib
     src/GroundGrid.cpp
 )
-
+ament_target_dependencies(${PROJECT_NAME}_lib
+    rclcpp
+    tf2
+    tf2_ros
+    tf2_msgs
+    geometry_msgs
+    sensor_msgs
+    nav_msgs
+    pcl_ros
+    pcl_conversions
+    grid_map_core
+    grid_map_ros
+    grid_map_cv
+    grid_map_msgs
+)
 target_link_libraries(${PROJECT_NAME}_lib
     rclcpp
 )
@@ -41,14 +55,27 @@ target_link_libraries(${PROJECT_NAME}_lib
 add_library(${PROJECT_NAME}_groundsegmentation_lib
     src/GroundSegmentation.cpp
 )
-
+ament_target_dependencies(${PROJECT_NAME}_groundsegmentation_lib
+    rclcpp
+    tf2
+    tf2_ros
+    tf2_msgs
+    geometry_msgs
+    sensor_msgs
+    nav_msgs
+    pcl_ros
+    pcl_conversions
+    grid_map_ros
+    grid_map_cv
+    grid_map_msgs
+)
 target_link_libraries(${PROJECT_NAME}_groundsegmentation_lib
     rclcpp
 )
 
 
-add_library(ground_grid_component src/GroundGridNode.cpp)
-ament_target_dependencies(ground_grid_component
+add_library(groundgrid_component src/GroundGridNode.cpp)
+ament_target_dependencies(groundgrid_component
     rclcpp
     rclcpp_components
     tf2
@@ -65,29 +92,27 @@ ament_target_dependencies(ground_grid_component
     grid_map_core
     grid_map_ros
     grid_map_cv
-    grid_map_loader
     grid_map_msgs
-    grid_map_rviz_plugin
     grid_map_visualization
 )
 rclcpp_components_register_node(
-    ground_grid_component
+    groundgrid_component
     PLUGIN "groundgrid::GroundGridNode"
-    EXECUTABLE ground_grid_node
+    EXECUTABLE groundgrid_node
 )
-ament_export_targets(export_ground_grid_component)
-install(TARGETS ground_grid_component
-        EXPORT export_ground_grid_node_component
+ament_export_targets(export_groundgrid_component)
+install(TARGETS groundgrid_component
+        EXPORT export_groundgrid_component
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
 )
 
-target_link_libraries(${PROJECT_NAME}_node
-    rclcpp
-    ${PROJECT_NAME}_lib
-    ${PROJECT_NAME}_groundsegmentation_lib
-)
+# target_link_libraries(${PROJECT_NAME}_node
+#     rclcpp
+#     ${PROJECT_NAME}_lib
+#     ${PROJECT_NAME}_groundsegmentation_lib
+# )
 
 install(
     TARGETS
