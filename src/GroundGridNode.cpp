@@ -50,7 +50,7 @@ public:
 
         // Subscribe to topics
         pos_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
-            "/localization/odometry/filtered_map", 1, 
+            "dlio/odom_node/odom", 1, 
             std::bind(&GroundGridNode::odom_callback, this, std::placeholders::_1)
         );
         points_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
