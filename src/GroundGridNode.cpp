@@ -24,7 +24,7 @@
 #include <grid_map_cv/grid_map_cv.hpp>
 
 #include <groundgrid/GroundGrid.h>
-#include <groundgrid/GroundGridFwd.h>
+// #include <groundgrid/GroundGridFwd.h>
 #include <groundgrid/GroundSegmentation.h>
 
 namespace groundgrid {
