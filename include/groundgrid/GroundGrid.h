@@ -17,25 +17,25 @@
 namespace groundgrid {
 
 class GroundGrid {
-public:
-    GroundGrid(tf2_ros::Buffer& tf_buffer, tf2_ros::TransformListener& tf_listener);
+// public:
+//     GroundGrid(tf2_ros::Buffer& tf_buffer, tf2_ros::TransformListener& tf_listener);
 
-    virtual ~GroundGrid();
-    void initGroundGrid(const nav_msgs::msg::Odometry::SharedPtr inOdom);
+//     virtual ~GroundGrid();
+//     void initGroundGrid(const nav_msgs::msg::Odometry::SharedPtr inOdom);
     
-    std::shared_ptr<grid_map::GridMap> update(const nav_msgs::msg::Odometry::SharedPtr inOdom);
+//     std::shared_ptr<grid_map::GridMap> update(const nav_msgs::msg::Odometry::SharedPtr inOdom);
 
-    const float mResolution = .33f;
-    const float mDimension = 120.0f;
+//     const float mResolution = .33f;
+//     const float mDimension = 120.0f;
 
-private:
-    tf2_ros::Buffer& tf_buffer_;
-    tf2_ros::TransformListener& tf_listener_;
+// private:
+//     tf2_ros::Buffer& tf_buffer_;
+//     tf2_ros::TransformListener& tf_listener_;
 
-    double mDetectionRadius = 60.0;
-    std::shared_ptr<grid_map::GridMap> mMap_ptr;
-    geometry_msgs::msg::TransformStamped mTfPosition, mTfLux, mTfUtm, mTfMap;
-    geometry_msgs::msg::PoseWithCovarianceStamped mLastPose;
+//     double mDetectionRadius = 60.0;
+//     std::shared_ptr<grid_map::GridMap> mMap_ptr;
+//     geometry_msgs::msg::TransformStamped mTfPosition, mTfLux, mTfUtm, mTfMap;
+//     geometry_msgs::msg::PoseWithCovarianceStamped mLastPose;
 };
 
 }
