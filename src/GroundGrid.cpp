@@ -8,12 +8,12 @@
 
 using namespace groundgrid;
 
-// GroundGrid::GroundGrid() {}
+GroundGrid::GroundGrid() {}
     
-GroundGrid::GroundGrid(tf2_ros::Buffer& tf_buffer, tf2_ros::TransformListener& tf_listener)
-        : tf_buffer_(tf_buffer), tf_listener_(tf_listener) {}
+// GroundGrid::GroundGrid(tf2_ros::Buffer& tf_buffer, tf2_ros::TransformListener& tf_listener)
+//         : tf_buffer_(tf_buffer), tf_listener_(tf_listener) {}
 
-GroundGrid::~GroundGrid() {}
+// GroundGrid::~GroundGrid() {}
 
 // void GroundGrid::initGroundGrid(const nav_msgs::msg::Odometry::SharedPtr inOdom) {
 //     std::chrono::_V2::steady_clock::time_point start = std::chrono::steady_clock::now();

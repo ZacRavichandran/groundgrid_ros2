@@ -21,8 +21,8 @@ namespace groundgrid {
 
 class GroundGrid {
 public:
-    // GroundGrid();
-    GroundGrid(tf2_ros::Buffer& tf_buffer, tf2_ros::TransformListener& tf_listener);
+    GroundGrid();
+    // GroundGrid(tf2_ros::Buffer& tf_buffer, tf2_ros::TransformListener& tf_listener);
 
     // virtual ~GroundGrid();
     // void initGroundGrid(const nav_msgs::msg::Odometry::SharedPtr inOdom);
