@@ -32,7 +32,7 @@ def generate_launch_description():
                 launch_ros.descriptions.ComposableNode(
                     package='groundgrid',
                     plugin='groundgrid::GroundGridNode',
-                    name='test',
+                    name='groundgrid_node',
                     remappings=[
                         ('/sensors/velodyne_points', LaunchConfiguration('point_cloud_topic'))
                     ]
