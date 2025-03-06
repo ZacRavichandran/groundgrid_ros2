@@ -24,7 +24,6 @@
     <depend>tf2_msgs</depend>
     <depend>tf2_geometry_msgs</depend>
 
-    <!-- grid_map -->
     <depend>grid_map_core</depend>
     <depend>grid_map_ros</depend>
     <depend>grid_map_cv</depend>
