@@ -21,7 +21,7 @@ public:
     GroundGrid();
     // GroundGrid(tf2_ros::Buffer& tf_buffer, tf2_ros::TransformListener& tf_listener);
 
-    virtual ~GroundGrid();
+    // virtual ~GroundGrid();
     // void initGroundGrid(const nav_msgs::msg::Odometry::SharedPtr inOdom);
     
     // std::shared_ptr<grid_map::GridMap> update(const nav_msgs::msg::Odometry::SharedPtr inOdom);
