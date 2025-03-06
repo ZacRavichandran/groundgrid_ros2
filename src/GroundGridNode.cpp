@@ -41,27 +41,27 @@ public:
         ground_segmentation_.init(groundgrid_->mDimension, groundgrid_->mResolution);
 
         // Initialize publishers and subscribers
-        // image_transport::ImageTransport it(shared_from_this());
-        // grid_map_cv_img_pub_ = it.advertise("groundgrid/grid_map_cv", 1);
-        // terrain_im_pub_ = it.advertise("groundgrid/terrain", 1);
-        // grid_map_pub_ = this->create_publisher<grid_map_msgs::msg::GridMap>("groundgrid/grid_map", 1);
-        // filtered_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("groundgrid/segmented_cloud", 1);        
+        image_transport::ImageTransport it(shared_from_this());
+        grid_map_cv_img_pub_ = it.advertise("groundgrid/grid_map_cv", 1);
+        terrain_im_pub_ = it.advertise("groundgrid/terrain", 1);
+        grid_map_pub_ = this->create_publisher<grid_map_msgs::msg::GridMap>("groundgrid/grid_map", 1);
+        filtered_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("groundgrid/segmented_cloud", 1);        
 
-        // pos_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
-        //     "dlio/odom_node/odom", 1, std::bind(&GroundGridNode::odom_callback, this, std::placeholders::_1));
+        pos_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
+            "dlio/odom_node/odom", 1, std::bind(&GroundGridNode::odom_callback, this, std::placeholders::_1));
         // points_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
         //     "/ouster/points", 1, std::bind(&GroundGridNode::points_callback, this, std::placeholders::_1));
     }
 
 protected:
-    // void odom_callback(const nav_msgs::msg::Odometry::SharedPtr inOdom) {
-    //     RCLCPP_INFO(this->get_logger(), "Received odometry message");
-    //     auto start = std::chrono::steady_clock::now();
-    //     map_ptr_ = groundgrid_->update(inOdom);
-    //     auto end = std::chrono::steady_clock::now();
-    //     RCLCPP_DEBUG(this->get_logger(), "Grid map update took %ld ms", 
-    //         std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
-    // }
+    void odom_callback(const nav_msgs::msg::Odometry::SharedPtr inOdom) {
+        RCLCPP_INFO(this->get_logger(), "Received odometry message");
+        auto start = std::chrono::steady_clock::now();
+        map_ptr_ = groundgrid_->update(inOdom);
+        auto end = std::chrono::steady_clock::now();
+        RCLCPP_DEBUG(this->get_logger(), "Grid map update took %ld ms", 
+            std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
+    }
 
     // void points_callback(const sensor_msgs::msg::PointCloud2::SharedPtr cloud_msg) {
     //     RCLCPP_INFO(this->get_logger(), "Received point cloud message");
