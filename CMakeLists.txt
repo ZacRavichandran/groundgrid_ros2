@@ -104,7 +104,11 @@ rclcpp_components_register_node(
     EXECUTABLE groundgrid_node
 )
 ament_export_targets(export_groundgrid_component)
-install(TARGETS groundgrid_component
+install(TARGETS 
+        ${PROJECT_NAME}_lib
+        ${PROJECT_NAME}_groundsegmentation_lib
+        ${PROJECT_NAME}_node
+        groundgrid_component
         EXPORT export_groundgrid_component
         ARCHIVE DESTINATION lib
         LIBRARY DESTINATION lib
@@ -117,15 +121,15 @@ install(TARGETS groundgrid_component
 #     ${PROJECT_NAME}_groundsegmentation_lib
 # )
 
-install(
-    TARGETS
-        ${PROJECT_NAME}_lib
-        ${PROJECT_NAME}_groundsegmentation_lib
-        ${PROJECT_NAME}_node
-    ARCHIVE DESTINATION lib
-    LIBRARY DESTINATION lib
-    RUNTIME DESTINATION bin
-)
+# install(
+#     TARGETS
+#         ${PROJECT_NAME}_lib
+#         ${PROJECT_NAME}_groundsegmentation_lib
+#         ${PROJECT_NAME}_node
+#     ARCHIVE DESTINATION lib
+#     LIBRARY DESTINATION lib
+#     RUNTIME DESTINATION bin
+# )
 
 install(DIRECTORY include/${PROJECT_NAME}/
     DESTINATION include/
