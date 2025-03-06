@@ -88,7 +88,7 @@ protected:
 
         geometry_msgs::msg::PointStamped origin;
         origin.header = cloud_msg->header;
-        origin.header.frame_id = "velodyne";
+        origin.header.frame_id = "os_sensor";
         origin.point.x = 0.0f;
         origin.point.y = 0.0f;
         origin.point.z = 0.0f;
