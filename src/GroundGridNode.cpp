@@ -34,7 +34,9 @@ class GroundGridNode : public rclcpp::Node {
 public:
     typedef velodyne_pointcloud::PointXYZIR PCLPoint;
 
-    GroundGridNode(const rclcpp::NodeOptions & options) : Node("groundgrid_node"){
+    GroundGridNode(const rclcpp::NodeOptions & options) : Node("groundgrid_node")
+    // , mTfBuffer_(this->get_clock()), mTfListener_(mTfBuffer_) 
+    {
         // groundgrid_ = std::make_shared<GroundGrid>(mTfBuffer_, mTfListener_);
         // ground_segmentation_.init(groundgrid_->mDimension, groundgrid_->mResolution);
 
