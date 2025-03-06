@@ -37,7 +37,7 @@ public:
     GroundGridNode(const rclcpp::NodeOptions & options) : Node("groundgrid_node", options), 
     mTfBuffer_(this->get_clock()), mTfListener_(mTfBuffer_) 
     {
-        groundgrid_ = std::make_shared<GroundGrid>(mTfBuffer_, mTfListener_);
+        // groundgrid_ = std::make_shared<GroundGrid>(mTfBuffer_, mTfListener_);
         // groundgrid_ = std::make_shared<GroundGrid>();
         // ground_segmentation_.init(groundgrid_->mDimension, groundgrid_->mResolution);
 
