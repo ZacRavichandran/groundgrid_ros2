@@ -1,8 +1,8 @@
 #pragma once
 
 // Grid map
-#include <grid_map_ros/grid_map_ros.hpp>
-#include <grid_map_msgs/msg/grid_map.hpp>
+// #include <grid_map_ros/grid_map_ros.hpp>
+// #include <grid_map_msgs/msg/grid_map.hpp>
 
 // ROS 2 messages
 #include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
