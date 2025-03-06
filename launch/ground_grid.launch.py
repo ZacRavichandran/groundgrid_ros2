@@ -26,17 +26,17 @@ def generate_launch_description():
         ),
 
         # Load the component explicitly
-        # LoadComposableNodes(
-        #     target_container=f'/{namespace}/{container_name}',
-        #     composable_node_descriptions=[
-        #         launch_ros.descriptions.ComposableNode(
-        #             package='groundgrid',
-        #             plugin='groundgrid::GroundGridNode',
-        #             name='groundgrid_node',
-        #             remappings=[
-        #                 ('/sensors/velodyne_points', LaunchConfiguration('point_cloud_topic'))
-        #             ]
-        #         )
-        #     ]
-        # )
+        LoadComposableNodes(
+            target_container=f'/{namespace}/{container_name}',
+            composable_node_descriptions=[
+                launch_ros.descriptions.ComposableNode(
+                    package='groundgrid',
+                    plugin='groundgrid::GroundGridNode',
+                    name='test',
+                    remappings=[
+                        ('/sensors/velodyne_points', LaunchConfiguration('point_cloud_topic'))
+                    ]
+                )
+            ]
+        )
     ])
