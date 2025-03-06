@@ -1,0 +1,3 @@
+<library path="libgroundgrid_component">
+    <class name="groundgrid::GroundGridNode" type="groundgrid::GroundGridNode" base_class_type="rclcpp_components::Node"/>
+</library>

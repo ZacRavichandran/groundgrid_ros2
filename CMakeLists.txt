@@ -103,6 +103,8 @@ rclcpp_components_register_node(
     PLUGIN "groundgrid::GroundGridNode"
     EXECUTABLE groundgrid_node
 )
+ament_export_libraries(groundgrid_component)
+
 ament_export_targets(export_groundgrid_component)
 install(TARGETS 
         ${PROJECT_NAME}_lib
@@ -139,5 +141,11 @@ install(DIRECTORY include/${PROJECT_NAME}/
 install(DIRECTORY launch
     DESTINATION share/${PROJECT_NAME}/
 )
+
+install(
+    FILES groundgrid_component.xml
+    DESTINATION share/${PROJECT_NAME}
+)
+
 
 ament_package()
