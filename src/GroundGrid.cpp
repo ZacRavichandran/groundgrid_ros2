@@ -117,9 +117,9 @@ private:
     // tf2_ros::Buffer& tf_buffer_;
     // tf2_ros::TransformListener& tf_listener_;
 
-    std::shared_ptr<grid_map::GridMap> mMap_ptr;
-    geometry_msgs::msg::PoseWithCovarianceStamped mLastPose;
+    // std::shared_ptr<grid_map::GridMap> mMap_ptr;
+    // geometry_msgs::msg::PoseWithCovarianceStamped mLastPose;
 
-    double mDimension = 10.0;
-    double mResolution = 0.1;
+    // double mDimension = 10.0;
+    // double mResolution = 0.1;
 };

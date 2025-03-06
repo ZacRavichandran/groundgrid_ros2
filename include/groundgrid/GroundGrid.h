@@ -33,10 +33,10 @@ private:
     // tf2_ros::Buffer& tf_buffer_;
     // tf2_ros::TransformListener& tf_listener_;
 
-    double mDetectionRadius = 60.0;
-    std::shared_ptr<grid_map::GridMap> mMap_ptr;
-    geometry_msgs::msg::TransformStamped mTfPosition, mTfLux, mTfUtm, mTfMap;
-    geometry_msgs::msg::PoseWithCovarianceStamped mLastPose;
+    // double mDetectionRadius = 60.0;
+    // std::shared_ptr<grid_map::GridMap> mMap_ptr;
+    // geometry_msgs::msg::TransformStamped mTfPosition, mTfLux, mTfUtm, mTfMap;
+    // geometry_msgs::msg::PoseWithCovarianceStamped mLastPose;
 };
 
 }
