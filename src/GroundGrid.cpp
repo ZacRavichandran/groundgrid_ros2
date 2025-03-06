@@ -9,11 +9,9 @@
 // #include <tf2_ros/transform_listener.h>
 // #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
-// using namespace groundgrid;
+using namespace groundgrid;
 
-class GroundGrid {
-public:
-    GroundGrid() {}
+    GroundGrid::GroundGrid() {}
     // GroundGrid(tf2_ros::Buffer& tf_buffer, tf2_ros::TransformListener& tf_listener)
         // : tf_buffer_(tf_buffer), tf_listener_(tf_listener) {}
 
@@ -113,7 +111,7 @@ public:
     //     return mMap_ptr;
     // }
 
-private:
+// private:
     // tf2_ros::Buffer& tf_buffer_;
     // tf2_ros::TransformListener& tf_listener_;
 
@@ -122,4 +120,4 @@ private:
 
     // double mDimension = 10.0;
     // double mResolution = 0.1;
-};
+// };
