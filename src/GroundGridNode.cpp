@@ -42,8 +42,8 @@ public:
 
         // Initialize publishers and subscribers
         // image_transport::ImageTransport it(shared_from_this());
-        grid_map_cv_img_pub_ = it.advertise("groundgrid/grid_map_cv", 1);
-        terrain_im_pub_ = it.advertise("groundgrid/terrain", 1);
+        // grid_map_cv_img_pub_ = it.advertise("groundgrid/grid_map_cv", 1);
+        // terrain_im_pub_ = it.advertise("groundgrid/terrain", 1);
         grid_map_pub_ = this->create_publisher<grid_map_msgs::msg::GridMap>("groundgrid/grid_map", 1);
         filtered_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("groundgrid/segmented_cloud", 1);        
 
