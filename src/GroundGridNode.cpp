@@ -34,7 +34,8 @@ class GroundGridNode : public rclcpp::Node {
 public:
     typedef velodyne_pointcloud::PointXYZIR PCLPoint;
 
-    GroundGridNode(const rclcpp::NodeOptions & options) : Node("groundgrid_node") {
+    GroundGridNode(const rclcpp::NodeOptions & options) : Node("groundgrid_node"), 
+    mTfBuffer_(this->get_clock()), mTfListener_(mTfBuffer_) {
         // groundgrid_ = std::make_shared<GroundGrid>(mTfBuffer_, mTfListener_);
         // ground_segmentation_.init(groundgrid_->mDimension, groundgrid_->mResolution);
 
@@ -239,26 +240,26 @@ protected:
 
 private:
     /// subscriber
-    rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr points_sub_;
-    rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr pos_sub_;
+    // rclcpp::Subscription<sensor_msgs::msg::PointCloud2>::SharedPtr points_sub_;
+    // rclcpp::Subscription<nav_msgs::msg::Odometry>::SharedPtr pos_sub_;
 
-    /// publisher
-    image_transport::Publisher grid_map_cv_img_pub_;
-    image_transport::Publisher terrain_im_pub_;
-    rclcpp::Publisher<grid_map_msgs::msg::GridMap>::SharedPtr grid_map_pub_;
-    rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr filtered_cloud_pub_;
-    std::unordered_map<std::string, image_transport::Publisher> layer_pubs_;
+    // /// publisher
+    // image_transport::Publisher grid_map_cv_img_pub_;
+    // image_transport::Publisher terrain_im_pub_;
+    // rclcpp::Publisher<grid_map_msgs::msg::GridMap>::SharedPtr grid_map_pub_;
+    // rclcpp::Publisher<sensor_msgs::msg::PointCloud2>::SharedPtr filtered_cloud_pub_;
+    // std::unordered_map<std::string, image_transport::Publisher> layer_pubs_;
 
-    /// pointer to the functionality class
-    std::shared_ptr<GroundGrid> groundgrid_;
+    // /// pointer to the functionality class
+    // std::shared_ptr<GroundGrid> groundgrid_;
 
-    /// grid map
-    std::shared_ptr<grid_map::GridMap> map_ptr_;
+    // /// grid map
+    // std::shared_ptr<grid_map::GridMap> map_ptr_;
 
-    /// Filter class for grid map
-    GroundSegmentation ground_segmentation_;
+    // /// Filter class for grid map
+    // GroundSegmentation ground_segmentation_;
 
-    /// tf stuff
+    // /// tf stuff
     // tf2_ros::Buffer mTfBuffer_;
     // tf2_ros::TransformListener mTfListener_;
 };
