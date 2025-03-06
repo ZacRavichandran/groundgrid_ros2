@@ -149,7 +149,7 @@ protected:
         cloud_msg_out.header.frame_id = "map";
         filtered_cloud_pub_->publish(cloud_msg_out);
 
-        std::chrono::_V2::steady_clock::time_point = std::chrono::steady_clock::now();
+        std::chrono::_V2::steady_clock::time_point end = std::chrono::steady_clock::now();
         std::chrono::duration<double> elapsed_seconds = end - start2;
         const double milliseconds = elapsed_seconds.count() * 1000;
         const double c_millis = double(std::clock() - c_clock)/CLOCKS_PER_SEC * 1000;
