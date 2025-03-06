@@ -17,7 +17,7 @@ public:
     // GroundGrid(tf2_ros::Buffer& tf_buffer, tf2_ros::TransformListener& tf_listener)
         // : tf_buffer_(tf_buffer), tf_listener_(tf_listener) {}
 
-    ~GroundGrid() {}
+    // ~GroundGrid() {}
 
     // void initGroundGrid(const std::shared_ptr<nav_msgs::msg::Odometry> &inOdom) {
     //     std::chrono::_V2::steady_clock::time_point start = std::chrono::steady_clock::now();
