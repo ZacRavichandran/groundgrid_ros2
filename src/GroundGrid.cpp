@@ -13,7 +13,7 @@ using namespace groundgrid;
 
 class GroundGrid {
 public:
-    GroundGrid() {}
+    // GroundGrid() {}
     // GroundGrid(tf2_ros::Buffer& tf_buffer, tf2_ros::TransformListener& tf_listener)
         // : tf_buffer_(tf_buffer), tf_listener_(tf_listener) {}
 
