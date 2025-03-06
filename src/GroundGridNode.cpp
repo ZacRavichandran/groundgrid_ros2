@@ -13,7 +13,7 @@
 // ros opencv transport
 #include <image_transport/image_transport.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <cv_bridge/cv_bridge.hpp>
+#include <cv_bridge/cv_bridge.h>
 
 // ros tf
 #include <tf2_ros/transform_listener.h>
@@ -36,6 +36,8 @@ public:
 
     GroundGridNode(const rclcpp::NodeOptions & options) : Node("groundgrid_node"), 
     mTfBuffer_(this->get_clock()), mTfListener_(mTfBuffer_) {
+        groundgrid_ = std::make_shared<GroundGrid>();
+
         // Initialize publishers and subscribers
         image_transport::ImageTransport it(shared_from_this());
         grid_map_cv_img_pub_ = it.advertise("groundgrid/grid_map_cv", 1);
@@ -43,20 +45,13 @@ public:
         grid_map_pub_ = this->create_publisher<grid_map_msgs::msg::GridMap>("groundgrid/grid_map", 1);
         filtered_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("groundgrid/segmented_cloud", 1);
 
-        groundgrid_ = std::make_shared<GroundGrid>();
-
         // Initialize other components (if necessary)
         ground_segmentation_.init(shared_from_this(), groundgrid_->mDimension, groundgrid_->mResolution);
 
-        // Subscribe to topics
         pos_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
-            "dlio/odom_node/odom", 1, 
-            std::bind(&GroundGridNode::odom_callback, this, std::placeholders::_1)
-        );
+            "dlio/odom_node/odom", 1, std::bind(&GroundGridNode::odom_callback, this, std::placeholders::_1));
         points_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-            "/ouster/points", 1, 
-            std::bind(&GroundGridNode::points_callback, this, std::placeholders::_1)
-        );
+            "/ouster/points", 1, std::bind(&GroundGridNode::points_callback, this, std::placeholders::_1));
     }
 
 protected:

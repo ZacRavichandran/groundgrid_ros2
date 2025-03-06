@@ -11,13 +11,6 @@ def generate_launch_description():
             default_value='/ouster/points',
             description='Point cloud topic to subscribe to'
         ),
-        
-        # Declare the use_nodelets argument (if necessary)
-        DeclareLaunchArgument(
-            'use_nodelets',
-            default_value='false',
-            description='Use nodelets (not applicable in ROS 2)'
-        ),
 
         # Component container
         launch_ros.actions.ComposableNodeContainer(
