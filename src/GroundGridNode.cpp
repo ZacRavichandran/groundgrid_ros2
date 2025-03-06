@@ -54,6 +54,7 @@ public:
 
 protected:
     void odom_callback(const nav_msgs::msg::Odometry::SharedPtr inOdom) {
+        RCLCPP_INFO(this->get_logger(), "Received odometry message");
         auto start = std::chrono::steady_clock::now();
         map_ptr_ = groundgrid_->update(inOdom);
         auto end = std::chrono::steady_clock::now();
@@ -62,6 +63,7 @@ protected:
     }
 
     void points_callback(const sensor_msgs::msg::PointCloud2::SharedPtr cloud_msg) {
+        RCLCPP_INFO(this->get_logger(), "Received point cloud message");
         auto start = std::chrono::steady_clock::now();
         static size_t time_vals = 0;
         static double avg_time = 0.0;
