@@ -13,9 +13,8 @@ using namespace groundgrid;
 
 class GroundGrid : public rclcpp::Node {
 public:
-    GroundGrid() : Node("ground_grid_node"), tf_buffer_(this->get_clock()), tf_listener_(tf_buffer_) {
-        RCLCPP_INFO(this->get_logger(), "GroundGrid Node Initialized");
-    }
+GroundGrid(tf2_ros::Buffer& tf_buffer, tf2_ros::TransformListener& tf_listener)
+        : tf_buffer_(tf_buffer), tf_listener_(tf_listener) {}
 
     ~GroundGrid() {}
 
@@ -30,7 +29,7 @@ public:
         map.setGeometry(grid_map::Length(mDimension, mDimension), mResolution,
                         grid_map::Position(inOdom->pose.pose.position.x, inOdom->pose.pose.position.y));
 
-        RCLCPP_INFO(this->get_logger(), "Created map with size %f x %f m (%i x %i cells).",
+        RCLCPP_INFO(rclcpp::get_logger("groundgrid"), "Created map with size %f x %f m (%i x %i cells).",
                     map.getLength().x(), map.getLength().y(),
                     map.getSize()(0), map.getSize()(1));
 
@@ -46,7 +45,7 @@ public:
         map["maxGroundHeight"].setConstant(-100.0);
 
         std::chrono::_V2::steady_clock::time_point end = std::chrono::steady_clock::now();
-        RCLCPP_DEBUG(this->get_logger(), "Transforms lookup took %ld ms",
+        RCLCPP_DEBUG(rclcpp::get_logger("groundgrid"), "Transforms lookup took %ld ms",
                     std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
 
         mLastPose = odomPose;
@@ -74,9 +73,9 @@ public:
         try {
             base_to_map = tf_buffer_.lookupTransform("base_link", "map", tf2::TimePointZero);
         } catch (const tf2::LookupException &e) {
-            RCLCPP_WARN(this->get_logger(), "No transform available: %s", e.what());
+            RCLCPP_WARN(rclcpp::get_logger("groundgrid"), "No transform available: %s", e.what());
         } catch (const tf2::ExtrapolationException &e) {
-            RCLCPP_DEBUG(this->get_logger(), "Extrapolation required: %s", e.what());
+            RCLCPP_DEBUG(rclcpp::get_logger("groundgrid"), "Extrapolation required: %s", e.what());
         }
 
         geometry_msgs::msg::PointStamped ps;
@@ -107,15 +106,15 @@ public:
 
         map.convertToDefaultStartIndex();
         std::chrono::_V2::steady_clock::time_point end = std::chrono::steady_clock::now();
-        RCLCPP_DEBUG(this->get_logger(), "Total processing time: %ld ms",
+        RCLCPP_DEBUG(rclcpp::get_logger(), "Total processing time: %ld ms",
                     std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
 
         return mMap_ptr;
     }
 
 private:
-    tf2_ros::Buffer tf_buffer_;
-    tf2_ros::TransformListener tf_listener_;
+    tf2_ros::Buffer& tf_buffer_;
+    tf2_ros::TransformListener& tf_listener_;
 
     std::shared_ptr<grid_map::GridMap> mMap_ptr;
     geometry_msgs::msg::PoseWithCovarianceStamped mLastPose;

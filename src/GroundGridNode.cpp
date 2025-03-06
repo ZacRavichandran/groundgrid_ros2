@@ -36,17 +36,15 @@ public:
 
     GroundGridNode(const rclcpp::NodeOptions & options) : Node("groundgrid_node"), 
     mTfBuffer_(this->get_clock()), mTfListener_(mTfBuffer_) {
-        groundgrid_ = std::make_shared<GroundGrid>();
+        groundgrid_ = std::make_shared<GroundGrid>(mTfBuffer_, mTfListener_);
+        ground_segmentation_.init(shared_from_this(), groundgrid_->mDimension, groundgrid_->mResolution);
 
         // Initialize publishers and subscribers
         image_transport::ImageTransport it(shared_from_this());
         grid_map_cv_img_pub_ = it.advertise("groundgrid/grid_map_cv", 1);
         terrain_im_pub_ = it.advertise("groundgrid/terrain", 1);
         grid_map_pub_ = this->create_publisher<grid_map_msgs::msg::GridMap>("groundgrid/grid_map", 1);
-        filtered_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("groundgrid/segmented_cloud", 1);
-
-        // Initialize other components (if necessary)
-        ground_segmentation_.init(shared_from_this(), groundgrid_->mDimension, groundgrid_->mResolution);
+        filtered_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("groundgrid/segmented_cloud", 1);        
 
         pos_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
             "dlio/odom_node/odom", 1, std::bind(&GroundGridNode::odom_callback, this, std::placeholders::_1));
