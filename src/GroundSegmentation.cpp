@@ -1,13 +1,13 @@
-// #include <groundgrid/GroundSegmentation.h>
-// #include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
+#include <groundgrid/GroundSegmentation.h>
+#include <tf2_geometry_msgs/tf2_geometry_msgs.hpp>
 
-// #include <chrono>
-// #include <unordered_map>
-// #include <algorithm>
-// #include <thread>
-// #include <cmath>
+#include <chrono>
+#include <unordered_map>
+#include <algorithm>
+#include <thread>
+#include <cmath>
 
-// using namespace groundgrid;
+using namespace groundgrid;
 
 // void GroundSegmentation::init(const size_t dimension, const float& resolution) {
 //     const size_t cellCount = std::round(dimension / resolution);
