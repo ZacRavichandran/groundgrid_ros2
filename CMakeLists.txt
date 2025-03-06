@@ -101,7 +101,6 @@ ament_target_dependencies(groundgrid_component
 target_link_libraries(groundgrid_component
     ${PROJECT_NAME}_lib
     ${PROJECT_NAME}_groundsegmentation_lib
-    rclcpp
 )
 rclcpp_components_register_node(
     groundgrid_component
