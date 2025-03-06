@@ -50,22 +50,22 @@ public:
         pos_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
             "dlio/odom_node/odom", 1, std::bind(&GroundGridNode::odom_callback, this, std::placeholders::_1));
         points_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-            "/ouster/points", 1, std::bind(&GroundGridNode::points_callback, this, std::placeholders::_1));
+            "ouster/points", 1, std::bind(&GroundGridNode::points_callback, this, std::placeholders::_1));
     }
 
 protected:
     void odom_callback(const nav_msgs::msg::Odometry::SharedPtr inOdom) {
         RCLCPP_INFO(this->get_logger(), "Received odometry message");
-        auto start = std::chrono::steady_clock::now();
+        std::chrono::_V2::steady_clock::time_point start = std::chrono::steady_clock::now();
         map_ptr_ = groundgrid_->update(inOdom);
-        auto end = std::chrono::steady_clock::now();
+        std::chrono::_V2::steady_clock::time_point end = std::chrono::steady_clock::now();
         RCLCPP_DEBUG(this->get_logger(), "Grid map update took %ld ms", 
             std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
     }
 
     void points_callback(const sensor_msgs::msg::PointCloud2::SharedPtr cloud_msg) {
         RCLCPP_INFO(this->get_logger(), "Received point cloud message");
-        auto start = std::chrono::steady_clock::now();
+        std::chrono::_V2::steady_clock::time_point start = std::chrono::steady_clock::now();
         static size_t time_vals = 0;
         static double avg_time = 0.0;
         static double avg_cpu_time = 0.0;
@@ -132,11 +132,11 @@ protected:
             cloud = transformed_cloud;
         }
 
-        auto end = std::chrono::steady_clock::now();
+        std::chrono::_V2::steady_clock::time_point end = std::chrono::steady_clock::now();
         RCLCPP_DEBUG(this->get_logger(), "cloud transformation took %ld ms", 
                     std::chrono::duration_cast<std::chrono::milliseconds>(end-start).count());
 
-        auto start2 = std::chrono::steady_clock::now();
+        std::chrono::_V2::steady_clock::time_point start2 = std::chrono::steady_clock::now();
         std::clock_t c_clock = std::clock();
         sensor_msgs::msg::PointCloud2 cloud_msg_out;
         PCLPoint origin_pclPoint;
@@ -149,7 +149,7 @@ protected:
         cloud_msg_out.header.frame_id = "map";
         filtered_cloud_pub_->publish(cloud_msg_out);
 
-        end = std::chrono::steady_clock::now();
+        std::chrono::_V2::steady_clock::time_point = std::chrono::steady_clock::now();
         std::chrono::duration<double> elapsed_seconds = end - start2;
         const double milliseconds = elapsed_seconds.count() * 1000;
         const double c_millis = double(std::clock() - c_clock)/CLOCKS_PER_SEC * 1000;
