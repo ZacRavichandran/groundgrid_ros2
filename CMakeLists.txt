@@ -47,6 +47,7 @@ ament_target_dependencies(${PROJECT_NAME}_lib
     grid_map_ros
     grid_map_cv
     grid_map_msgs
+    grid_map_rviz_plugin
 )
 
 add_library(${PROJECT_NAME}_groundsegmentation_lib

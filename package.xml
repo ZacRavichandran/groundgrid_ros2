@@ -29,6 +29,7 @@
     <depend>grid_map_cv</depend>
     <depend>grid_map_msgs</depend>
     <depend>grid_map_visualization</depend>
+    <depend>grid_map_rviz_plugin</depend>
     <depend>cv_bridge</depend>
     <depend>nav_msgs</depend>
     <depend>pcl_ros</depend>
