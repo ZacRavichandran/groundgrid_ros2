@@ -9,6 +9,7 @@ find_package(rclcpp_components REQUIRED)
 find_package(tf2 REQUIRED)
 find_package(tf2_ros REQUIRED)
 find_package(tf2_msgs REQUIRED)
+find_package(tf2_geometry_msgs REQUIRED)
 find_package(geometry_msgs REQUIRED)
 find_package(sensor_msgs REQUIRED)
 find_package(nav_msgs REQUIRED)
@@ -38,6 +39,7 @@ ament_target_dependencies(${PROJECT_NAME}_lib
     tf2
     tf2_ros
     tf2_msgs
+    tf2_geometry_msgs
     geometry_msgs
     sensor_msgs
     nav_msgs
@@ -60,6 +62,7 @@ ament_target_dependencies(${PROJECT_NAME}_groundsegmentation_lib
     tf2
     tf2_ros
     tf2_msgs
+    tf2_geometry_msgs
     geometry_msgs
     sensor_msgs
     nav_msgs
@@ -73,7 +76,6 @@ target_link_libraries(${PROJECT_NAME}_groundsegmentation_lib
     rclcpp
 )
 
-
 add_library(groundgrid_component SHARED src/GroundGridNode.cpp)
 ament_target_dependencies(groundgrid_component
     rclcpp
@@ -81,6 +83,7 @@ ament_target_dependencies(groundgrid_component
     tf2
     tf2_ros
     tf2_msgs
+    tf2_geometry_msgs
     geometry_msgs
     sensor_msgs
     nav_msgs
