@@ -7,11 +7,9 @@
 #include <tf2/LinearMath/Quaternion.h>
 
 using namespace groundgrid;
-
-GroundGrid::GroundGrid() {}
     
-// GroundGrid::GroundGrid(tf2_ros::Buffer& tf_buffer, tf2_ros::TransformListener& tf_listener)
-//         : tf_buffer_(tf_buffer), tf_listener_(tf_listener) {}
+GroundGrid::GroundGrid(tf2_ros::Buffer& tf_buffer, tf2_ros::TransformListener& tf_listener)
+        : tf_buffer_(tf_buffer), tf_listener_(tf_listener) {}
 
 // GroundGrid::~GroundGrid() {}
 
