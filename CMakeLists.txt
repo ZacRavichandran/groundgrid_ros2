@@ -21,9 +21,7 @@ find_package(pcl_conversions REQUIRED)
 find_package(grid_map_core REQUIRED)
 find_package(grid_map_ros REQUIRED)
 find_package(grid_map_cv REQUIRED)
-# find_package(grid_map_loader REQUIRED)
 find_package(grid_map_msgs REQUIRED)
-# find_package(grid_map_rviz_plugin REQUIRED)
 find_package(grid_map_visualization REQUIRED)
 find_package(OpenCV REQUIRED)
 find_package(PCL REQUIRED COMPONENTS common)
@@ -114,22 +112,6 @@ install(TARGETS
         LIBRARY DESTINATION lib
         RUNTIME DESTINATION bin
 )
-
-# target_link_libraries(${PROJECT_NAME}_node
-#     rclcpp
-#     ${PROJECT_NAME}_lib
-#     ${PROJECT_NAME}_groundsegmentation_lib
-# )
-
-# install(
-#     TARGETS
-#         ${PROJECT_NAME}_lib
-#         ${PROJECT_NAME}_groundsegmentation_lib
-#         ${PROJECT_NAME}_node
-#     ARCHIVE DESTINATION lib
-#     LIBRARY DESTINATION lib
-#     RUNTIME DESTINATION bin
-# )
 
 install(DIRECTORY include/${PROJECT_NAME}/
     DESTINATION include/
