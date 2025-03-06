@@ -5,8 +5,8 @@
 // #include <grid_map_msgs/msg/grid_map.hpp>
 
 // ROS 2 messages
-#include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
-#include <nav_msgs/msg/odometry.hpp>
+// #include <geometry_msgs/msg/pose_with_covariance_stamped.hpp>
+// #include <nav_msgs/msg/odometry.hpp>
 
 // TF2
 #include <tf2_ros/buffer.h>
