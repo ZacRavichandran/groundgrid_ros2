@@ -19,6 +19,9 @@
     <depend>geometry_msgs</depend>
     <depend>sensor_msgs</depend>
     <depend>std_msgs</depend>
+    <depend>tf2</depend>
+    <depend>tf2_ros</depend>
+    <depend>tf2_msgs</depend>
     
     <!-- grid_map -->
     <depend>grid_map_core</depend>
