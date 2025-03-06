@@ -98,10 +98,12 @@ ament_target_dependencies(groundgrid_component
     grid_map_msgs
     grid_map_visualization
 )
-target_link_libraries(groundgrid_component
-    ${PROJECT_NAME}_lib
-    ${PROJECT_NAME}_groundsegmentation_lib
-)
+
+# target_link_libraries(groundgrid_component
+#     ${PROJECT_NAME}_lib
+#     ${PROJECT_NAME}_groundsegmentation_lib
+# )
+
 rclcpp_components_register_node(
     groundgrid_component
     PLUGIN "groundgrid::GroundGridNode"
