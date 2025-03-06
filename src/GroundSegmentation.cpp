@@ -9,7 +9,7 @@
 
 using namespace groundgrid;
 
-void GroundSegmentation::init(rclcpp::Node::SharedPtr nodeHandle, const size_t dimension, const float& resolution) {
+void GroundSegmentation::init(const size_t dimension, const float& resolution) {
     const size_t cellCount = std::round(dimension / resolution);
 
     expectedPoints.resize(cellCount, cellCount);

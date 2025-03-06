@@ -23,7 +23,7 @@ class GroundSegmentation {
     using PCLPoint = velodyne_pointcloud::PointXYZIR;
 
     GroundSegmentation() = default;
-    void init(rclcpp::Node::SharedPtr nodeHandle, const size_t dimension, const float& resolution);
+    void init(const size_t dimension, const float& resolution);
     pcl::PointCloud<PCLPoint>::Ptr filter_cloud(const pcl::PointCloud<PCLPoint>::Ptr cloud, const PCLPoint& cloudOrigin, const geometry_msgs::msg::TransformStamped& mapToBase, grid_map::GridMap &map);
     void insert_cloud(const pcl::PointCloud<PCLPoint>::Ptr cloud, const size_t start, const size_t end, const PCLPoint& cloudOrigin, std::vector<std::pair<size_t, grid_map::Index> >& point_index, std::vector<std::pair<size_t, grid_map::Index> >& ignored, std::vector<size_t>& outliers, grid_map::GridMap &map);
     void detect_ground_patches(grid_map::GridMap &map, unsigned short section) const;
