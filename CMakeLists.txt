@@ -50,9 +50,6 @@ ament_target_dependencies(${PROJECT_NAME}_lib
     grid_map_cv
     grid_map_msgs
 )
-target_link_libraries(${PROJECT_NAME}_lib
-    rclcpp
-)
 
 add_library(${PROJECT_NAME}_groundsegmentation_lib
     src/GroundSegmentation.cpp
@@ -71,9 +68,6 @@ ament_target_dependencies(${PROJECT_NAME}_groundsegmentation_lib
     grid_map_ros
     grid_map_cv
     grid_map_msgs
-)
-target_link_libraries(${PROJECT_NAME}_groundsegmentation_lib
-    rclcpp
 )
 
 add_library(groundgrid_component SHARED src/GroundGridNode.cpp)
@@ -99,10 +93,10 @@ ament_target_dependencies(groundgrid_component
     grid_map_visualization
 )
 
-# target_link_libraries(groundgrid_component
-#     ${PROJECT_NAME}_lib
-#     ${PROJECT_NAME}_groundsegmentation_lib
-# )
+target_link_libraries(groundgrid_component
+    ${PROJECT_NAME}_lib
+    ${PROJECT_NAME}_groundsegmentation_lib
+)
 
 rclcpp_components_register_node(
     groundgrid_component
