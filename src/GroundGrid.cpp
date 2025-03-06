@@ -106,7 +106,7 @@ GroundGrid(tf2_ros::Buffer& tf_buffer, tf2_ros::TransformListener& tf_listener)
 
         map.convertToDefaultStartIndex();
         std::chrono::_V2::steady_clock::time_point end = std::chrono::steady_clock::now();
-        RCLCPP_DEBUG(rclcpp::get_logger(), "Total processing time: %ld ms",
+        RCLCPP_DEBUG(rclcpp::get_logger("groundgrid"), "Total processing time: %ld ms",
                     std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
 
         return mMap_ptr;
