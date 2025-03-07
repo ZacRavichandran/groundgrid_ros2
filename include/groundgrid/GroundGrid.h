@@ -21,20 +21,19 @@ namespace groundgrid {
 
 class GroundGrid {
 public:
-    GroundGrid(tf2_ros::Buffer& tf_buffer, tf2_ros::TransformListener& tf_listener);
+    GroundGrid();
 
     virtual ~GroundGrid();
     void initGroundGrid(const nav_msgs::msg::Odometry::SharedPtr inOdom);
     
-    std::shared_ptr<grid_map::GridMap> update(const nav_msgs::msg::Odometry::SharedPtr inOdom);
+    std::shared_ptr<grid_map::GridMap> update(
+        const nav_msgs::msg::Odometry::SharedPtr inOdom, 
+        geometry_msgs::msg::TransformStamped &map_to_base_transform);
 
     const float mResolution = .33f;
     const float mDimension = 120.0f;
 
 private:
-    tf2_ros::Buffer& tf_buffer_;
-    tf2_ros::TransformListener& tf_listener_;
-
     double mDetectionRadius = 60.0;
     std::shared_ptr<grid_map::GridMap> mMap_ptr;
     geometry_msgs::msg::TransformStamped mTfPosition, mTfLux, mTfUtm, mTfMap;

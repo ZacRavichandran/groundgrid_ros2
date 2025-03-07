@@ -5,11 +5,13 @@
 #include <grid_map_core/GridMapMath.hpp>
 #include <tf2/LinearMath/Matrix3x3.h>
 #include <tf2/LinearMath/Quaternion.h>
+#include <geometry_msgs/msg/quaternion.hpp>
+#include <geometry_msgs/msg/transform_stamped.hpp>
+#include <geometry_msgs/msg/vector3.hpp>
 
 using namespace groundgrid;
     
-GroundGrid::GroundGrid(tf2_ros::Buffer& tf_buffer, tf2_ros::TransformListener& tf_listener)
-        : tf_buffer_(tf_buffer), tf_listener_(tf_listener) {}
+GroundGrid::GroundGrid() {}
 
 GroundGrid::~GroundGrid() {}
 
@@ -46,7 +48,8 @@ void GroundGrid::initGroundGrid(const nav_msgs::msg::Odometry::SharedPtr inOdom)
     mLastPose = odomPose;
 }
 
-std::shared_ptr<grid_map::GridMap> GroundGrid::update(const nav_msgs::msg::Odometry::SharedPtr inOdom) {
+std::shared_ptr<grid_map::GridMap> GroundGrid::update(
+    const nav_msgs::msg::Odometry::SharedPtr inOdom, geometry_msgs::msg::TransformStamped &map_to_base_transform) {
     if (!mMap_ptr) {
         initGroundGrid(inOdom);
         return mMap_ptr;
@@ -62,15 +65,15 @@ std::shared_ptr<grid_map::GridMap> GroundGrid::update(const nav_msgs::msg::Odome
     std::vector<grid_map::BufferRegion> damage;
     map.move(grid_map::Position(inOdom->pose.pose.position.x, inOdom->pose.pose.position.y), damage);
 
-    // Static so if the new transform is not yet available, we can use the last one
-    static geometry_msgs::msg::TransformStamped base_to_map;
-
-    try {
-        base_to_map = tf_buffer_.lookupTransform("base_link", "map", tf2::TimePointZero);
-    } catch (const tf2::TransformException &e) {
-        RCLCPP_WARN(rclcpp::get_logger("groundgrid"), "Failed to get transform in GroundGrid.cpp: %s", e.what());
-        return mMap_ptr;
-    }
+    // reverse the transform
+    tf2::Transform tf_map_to_base;
+    tf2::fromMsg(map_to_base_transform.transform, tf_map_to_base);
+    tf2::Transform tf_base_to_map = tf_map_to_base.inverse();
+    geometry_msgs::msg::TransformStamped base_to_map_transform;
+    base_to_map_transform.header = map_to_base_transform.header;
+    base_to_map_transform.header.frame_id = map_to_base_transform.child_frame_id;
+    base_to_map_transform.child_frame_id = map_to_base_transform.header.frame_id;
+    base_to_map_transform.transform = tf2::toMsg(tf_base_to_map);
 
     geometry_msgs::msg::PointStamped ps;
     ps.header = inOdom->header;
@@ -85,7 +88,7 @@ std::shared_ptr<grid_map::GridMap> GroundGrid::update(const nav_msgs::msg::Odome
             ps.point.x = pos(0);
             ps.point.y = pos(1);
             ps.point.z = 0;
-            tf2::doTransform(ps, ps, base_to_map);
+            tf2::doTransform(ps, ps, base_to_map_transform);
             map.at("ground", idx) = -ps.point.z;
             map.at("groundpatch", idx) = 0.0;
         }

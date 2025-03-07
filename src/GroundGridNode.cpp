@@ -73,7 +73,7 @@ protected:
     void odom_callback(const nav_msgs::msg::Odometry::SharedPtr inOdom) {
         RCLCPP_INFO(this->get_logger(), "Received odometry message");
         auto start = std::chrono::steady_clock::now();
-        map_ptr_ = groundgrid_->update(inOdom);
+        map_ptr_ = groundgrid_->update(inOdom, mapToBaseTransform_);
         auto end = std::chrono::steady_clock::now();
         RCLCPP_DEBUG(this->get_logger(), "Grid map update took %ld ms", 
             std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count());
