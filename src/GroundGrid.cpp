@@ -66,11 +66,10 @@ std::shared_ptr<grid_map::GridMap> GroundGrid::update(const nav_msgs::msg::Odome
     static geometry_msgs::msg::TransformStamped base_to_map;
 
     try {
-        base_to_map = tf_buffer_.lookupTransform("base_link", "map", tf2::TimePointZero, std::chrono::milliseconds(1000));
+        base_to_map = tf_buffer_.lookupTransform("base_link", "map", tf2::TimePointZero);
     } catch (const tf2::LookupException &e) {
-        RCLCPP_WARN(rclcpp::get_logger("groundgrid"), "No transform available: %s", e.what());
-    } catch (const tf2::ExtrapolationException &e) {
-        RCLCPP_DEBUG(rclcpp::get_logger("groundgrid"), "Extrapolation required: %s", e.what());
+        RCLCPP_WARN(rclcpp::get_logger("groundgrid"), "Failed to get transform: %s", e.what());
+        return mMap_ptr;
     }
 
     geometry_msgs::msg::PointStamped ps;
