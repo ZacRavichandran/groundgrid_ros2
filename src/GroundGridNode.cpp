@@ -78,7 +78,7 @@ protected:
             return;
 
         try {
-            mapToBaseTransform = mTfBuffer_.lookupTransform("map", "base_link", tf2::TimePointZero, std::chrono::milliseconds(50));
+            mapToBaseTransform = mTfBuffer_.lookupTransform("map", "base_link", tf2::TimePointZero, std::chrono::milliseconds(500));
             cloudOriginTransform = mTfBuffer_.lookupTransform("map", "os_sensor", tf2::TimePointZero);
         }
         catch (const tf2::TransformException &ex) {
