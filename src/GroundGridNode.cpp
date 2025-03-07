@@ -13,7 +13,7 @@
 // ros opencv transport
 #include <image_transport/image_transport.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <cv_bridge/cv_bridge.h>
+#include <cv_bridge/cv_bridge.hpp>
 
 // ros tf
 #include <tf2_ros/transform_listener.h>
@@ -65,10 +65,9 @@ protected:
             cloudOriginTransform_ = mTfBuffer_.lookupTransform("map", "os_sensor", tf2::TimePointZero);
         }
         catch (const tf2::TransformException &ex) {
-            RCLCPP_WARN(this->get_logger(), "Received point cloud but transforms are not available: %s", ex.what());
+            RCLCPP_WARN(this->get_logger(), "Failed to get transforms in GroundGridNode.cpp: %s", ex.what());
             return;
         }
-        RCLCPP_INFO(this->get_logger(), "Got base_link to os_sensor transforms");
     }
 
     void odom_callback(const nav_msgs::msg::Odometry::SharedPtr inOdom) {
