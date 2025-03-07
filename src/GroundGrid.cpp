@@ -67,7 +67,7 @@ std::shared_ptr<grid_map::GridMap> GroundGrid::update(const nav_msgs::msg::Odome
 
     try {
         base_to_map = tf_buffer_.lookupTransform("base_link", "map", tf2::TimePointZero);
-    } catch (const tf2::LookupException &e) {
+    } catch (const tf2::TransformException &e) {
         RCLCPP_WARN(rclcpp::get_logger("groundgrid"), "Failed to get transform: %s", e.what());
         return mMap_ptr;
     }
