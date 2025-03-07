@@ -13,7 +13,7 @@
 // ros opencv transport
 #include <image_transport/image_transport.hpp>
 #include <opencv2/highgui/highgui.hpp>
-#include <cv_bridge/cv_bridge.hpp>
+#include <cv_bridge/cv_bridge.h>
 
 // ros tf
 #include <tf2_ros/transform_listener.h>
@@ -51,9 +51,26 @@ public:
             "dlio/odom_node/odom", 1, std::bind(&GroundGridNode::odom_callback, this, std::placeholders::_1));
         points_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
             "ouster/points", 1, std::bind(&GroundGridNode::points_callback, this, std::placeholders::_1));
+
+        rclcpp::TimerBase::SharedPtr timer = this->create_wall_timer(
+            std::chrono::milliseconds(100), std::bind(&GroundGridNode::transform_callback, this));
+        
+        
     }
 
 protected:
+    void transform_callback(){
+        try {
+            mapToBaseTransform_ = mTfBuffer_.lookupTransform("map", "base_link", tf2::TimePointZero);
+            cloudOriginTransform_ = mTfBuffer_.lookupTransform("map", "os_sensor", tf2::TimePointZero);
+        }
+        catch (const tf2::TransformException &ex) {
+            RCLCPP_WARN(this->get_logger(), "Received point cloud but transforms are not available: %s", ex.what());
+            return;
+        }
+        RCLCPP_INFO(this->get_logger(), "Got base_link to os_sensor transforms");
+    }
+
     void odom_callback(const nav_msgs::msg::Odometry::SharedPtr inOdom) {
         RCLCPP_INFO(this->get_logger(), "Received odometry message");
         auto start = std::chrono::steady_clock::now();
@@ -71,21 +88,10 @@ protected:
         static double avg_cpu_time = 0.0;
         pcl::PointCloud<velodyne_pointcloud::PointXYZIR>::Ptr cloud(new pcl::PointCloud<velodyne_pointcloud::PointXYZIR>);
         pcl::fromROSMsg (*cloud_msg, *cloud);
-        geometry_msgs::msg::TransformStamped mapToBaseTransform, cloudOriginTransform;
 
         // Map not initialized yet, this means the node hasn't received any odom message so far.
         if(!map_ptr_)
             return;
-
-        try {
-            mapToBaseTransform = mTfBuffer_.lookupTransform("map", "base_link", tf2::TimePointZero);
-            cloudOriginTransform = mTfBuffer_.lookupTransform("map", "os_sensor", tf2::TimePointZero);
-        }
-        catch (const tf2::TransformException &ex) {
-            RCLCPP_WARN(this->get_logger(), "Received point cloud but transforms are not available: %s", ex.what());
-            return;
-        }
-        RCLCPP_INFO(this->get_logger(), "Got base_link to os_sensor transforms");
 
         geometry_msgs::msg::PointStamped origin;
         origin.header = cloud_msg->header;
@@ -94,7 +100,7 @@ protected:
         origin.point.y = 0.0f;
         origin.point.z = 0.0f;
 
-        tf2::doTransform(origin, origin, cloudOriginTransform);
+        tf2::doTransform(origin, origin, cloudOriginTransform_);
 
         // Transform cloud into map coordinate system
         if(cloud_msg->header.frame_id != "map"){
@@ -144,7 +150,7 @@ protected:
         origin_pclPoint.x = origin.point.x;
         origin_pclPoint.y = origin.point.y;
         origin_pclPoint.z = origin.point.z;
-        pcl::toROSMsg(*(ground_segmentation_.filter_cloud(cloud, origin_pclPoint, mapToBaseTransform, *map_ptr_)), cloud_msg_out);
+        pcl::toROSMsg(*(ground_segmentation_.filter_cloud(cloud, origin_pclPoint, mapToBaseTransform_, *map_ptr_)), cloud_msg_out);
 
         cloud_msg_out.header = cloud_msg->header;
         cloud_msg_out.header.frame_id = "map";
@@ -264,6 +270,8 @@ private:
     /// tf stuff
     tf2_ros::Buffer mTfBuffer_;
     tf2_ros::TransformListener mTfListener_;
+
+    geometry_msgs::msg::TransformStamped mapToBaseTransform_, cloudOriginTransform_;
 };
 }
 
