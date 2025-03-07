@@ -48,7 +48,7 @@ public:
         filtered_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("groundgrid/segmented_cloud", 1);        
 
         pos_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
-            "Odometry", 1, std::bind(&GroundGridNode::odom_callback, this, std::placeholders::_1));
+            "dlio/odom_node/odom", 1, std::bind(&GroundGridNode::odom_callback, this, std::placeholders::_1));
         points_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
             "ouster/points", 1, std::bind(&GroundGridNode::points_callback, this, std::placeholders::_1));
     }
