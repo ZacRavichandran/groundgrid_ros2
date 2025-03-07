@@ -85,6 +85,7 @@ protected:
             RCLCPP_WARN(this->get_logger(), "Received point cloud but transforms are not available: %s", ex.what());
             return;
         }
+        RCLCPP_INFO(this->get_logger(), "Got base_link to os_sensor transforms");
 
         geometry_msgs::msg::PointStamped origin;
         origin.header = cloud_msg->header;
