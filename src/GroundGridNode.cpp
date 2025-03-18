@@ -49,8 +49,10 @@ public:
 
         pos_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
             "dlio/odom_node/odom", 1, std::bind(&GroundGridNode::odom_callback, this, std::placeholders::_1));
+        auto point_cloud_qos = rclcpp::QoS(1);
+        point_cloud_qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
         points_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-            "ouster/points", 1, std::bind(&GroundGridNode::points_callback, this, std::placeholders::_1));
+            "ouster/points", point_cloud_qos, std::bind(&GroundGridNode::points_callback, this, std::placeholders::_1));
 
         rclcpp::TimerBase::SharedPtr timer = this->create_wall_timer(
             std::chrono::milliseconds(100), std::bind(&GroundGridNode::transform_callback, this));
@@ -196,7 +198,7 @@ protected:
                 grid_map::GridMapCvConverter::toImage<unsigned char, 1>(map, layer_name, CV_8UC1, img);
                 cv::applyColorMap(img, color_img, cv::COLORMAP_TWILIGHT);
 
-                auto msg = cv_bridge::CvImage(std_msgs::msg::Header(), "8UC3", color_img).toImageMsg();
+                auto msg = cv_bridge::CvImage(std_msgs::msg::Header(), "bgr8", color_img).toImageMsg();
                 msg->header.stamp = stamp;
                 pub.publish(msg);
             } else { // special treatment for the terrain evaluation
