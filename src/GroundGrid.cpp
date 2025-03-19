@@ -22,7 +22,7 @@ void GroundGrid::initGroundGrid(const nav_msgs::msg::Odometry::SharedPtr inOdom)
 
     mMap_ptr = std::make_shared<grid_map::GridMap>(std::vector<std::string>{"points", "ground", "groundpatch", "minGroundHeight", "maxGroundHeight"});
     grid_map::GridMap &map = *mMap_ptr;
-    map.setFrameId("map");
+    map.setFrameId("odom");
     map.setGeometry(grid_map::Length(mDimension, mDimension), mResolution,
                     grid_map::Position(inOdom->pose.pose.position.x, inOdom->pose.pose.position.y));
 
@@ -77,7 +77,7 @@ std::shared_ptr<grid_map::GridMap> GroundGrid::update(
 
     geometry_msgs::msg::PointStamped ps;
     ps.header = inOdom->header;
-    ps.header.frame_id = "map";
+    ps.header.frame_id = "odom";
     grid_map::Position pos;
 
     for (auto region : damage) {

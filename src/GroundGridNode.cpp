@@ -63,8 +63,8 @@ public:
 protected:
     void transform_callback(){
         try {
-            mapToBaseTransform_ = mTfBuffer_.lookupTransform("map", "base_link", tf2::TimePointZero);
-            cloudOriginTransform_ = mTfBuffer_.lookupTransform("map", "os_sensor", tf2::TimePointZero);
+            mapToBaseTransform_ = mTfBuffer_.lookupTransform("odom", "base_link", tf2::TimePointZero);
+            cloudOriginTransform_ = mTfBuffer_.lookupTransform("odom", "os_lidar", tf2::TimePointZero);
         }
         catch (const tf2::TransformException &ex) {
             RCLCPP_WARN(this->get_logger(), "Failed to get transforms in GroundGridNode.cpp: %s", ex.what());
@@ -96,7 +96,7 @@ protected:
 
         geometry_msgs::msg::PointStamped origin;
         origin.header = cloud_msg->header;
-        origin.header.frame_id = "os_sensor";
+        origin.header.frame_id = "os_lidar";
         origin.point.x = 0.0f;
         origin.point.y = 0.0f;
         origin.point.z = 0.0f;
@@ -104,16 +104,16 @@ protected:
         tf2::doTransform(origin, origin, cloudOriginTransform_);
 
         // Transform cloud into map coordinate system
-        if(cloud_msg->header.frame_id != "map"){
+        if(cloud_msg->header.frame_id != "odom"){
             geometry_msgs::msg::TransformStamped transformStamped;
             pcl::PointCloud<velodyne_pointcloud::PointXYZIR>::Ptr transformed_cloud(new pcl::PointCloud<velodyne_pointcloud::PointXYZIR>);
             transformed_cloud->header = cloud->header;
-            transformed_cloud->header.frame_id = "map";
+            transformed_cloud->header.frame_id = "odom";
             transformed_cloud->points.reserve(cloud->points.size());
 
             try {
-                mTfBuffer_.canTransform("map", cloud_msg->header.frame_id, tf2::TimePointZero);
-                transformStamped = mTfBuffer_.lookupTransform("map", cloud_msg->header.frame_id, tf2::TimePointZero);
+                mTfBuffer_.canTransform("odom", cloud_msg->header.frame_id, tf2::TimePointZero);
+                transformStamped = mTfBuffer_.lookupTransform("odom", cloud_msg->header.frame_id, tf2::TimePointZero);
             }
             catch (const tf2::TransformException &ex) {
                 RCLCPP_WARN(this->get_logger(), "Failed to get map transform for point cloud transformation: %s", ex.what());
@@ -122,7 +122,7 @@ protected:
 
             geometry_msgs::msg::PointStamped psIn;
             psIn.header = cloud_msg->header;
-            psIn.header.frame_id = "map";
+            psIn.header.frame_id = "odom";
 
             for(const auto& point : cloud->points){
                 psIn.point.x = point.x;
@@ -154,7 +154,7 @@ protected:
         pcl::toROSMsg(*(ground_segmentation_.filter_cloud(cloud, origin_pclPoint, mapToBaseTransform_, *map_ptr_)), cloud_msg_out);
 
         cloud_msg_out.header = cloud_msg->header;
-        cloud_msg_out.header.frame_id = "map";
+        cloud_msg_out.header.frame_id = "odom";
         filtered_cloud_pub_->publish(cloud_msg_out);
 
         end = std::chrono::steady_clock::now();
