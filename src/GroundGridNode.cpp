@@ -47,7 +47,7 @@ namespace groundgrid
             // terrain_im_pub_ = it.advertise("groundgrid/terrain", 1);
             grid_map_pub_ = this->create_publisher<grid_map_msgs::msg::GridMap>("groundgrid/grid_map", 1);
             filtered_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("groundgrid/segmented_cloud", 1);
-            obstacle_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("obstacle_cloud", 1);
+            obstacle_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("groundgrid/obstacle_cloud", 1);
 
             pos_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
                 "dlio/odom_node/odom", 1, std::bind(&GroundGridNode::odom_callback, this, std::placeholders::_1));
