@@ -77,7 +77,7 @@ namespace groundgrid
 
         void odom_callback(const nav_msgs::msg::Odometry::SharedPtr inOdom)
         {
-            RCLCPP_INFO(this->get_logger(), "Received odometry message");
+            // RCLCPP_INFO(this->get_logger(), "Received odometry message");
             auto start = std::chrono::steady_clock::now();
             map_ptr_ = groundgrid_->update(inOdom, mapToBaseTransform_);
             auto end = std::chrono::steady_clock::now();
@@ -87,7 +87,7 @@ namespace groundgrid
 
         void points_callback(const sensor_msgs::msg::PointCloud2::SharedPtr cloud_msg)
         {
-            RCLCPP_INFO(this->get_logger(), "Received point cloud message");
+            // RCLCPP_INFO(this->get_logger(), "Received point cloud message");
             auto start = std::chrono::steady_clock::now();
             static size_t time_vals = 0;
             static double avg_time = 0.0;
@@ -189,7 +189,7 @@ namespace groundgrid
             avg_time = (milliseconds + time_vals * avg_time) / (time_vals + 1);
             avg_cpu_time = (c_millis + time_vals * avg_cpu_time) / (time_vals + 1);
             ++time_vals;
-            RCLCPP_INFO(this->get_logger(), "groundgrid took %.3f ms (avg: %.3f ms)", milliseconds, avg_time);
+            // RCLCPP_INFO(this->get_logger(), "groundgrid took %.3f ms (avg: %.3f ms)", milliseconds, avg_time);
             RCLCPP_DEBUG(this->get_logger(), "total cpu time used: %.3f ms (avg: %.3f ms)", c_millis, avg_cpu_time);
 
             grid_map_msgs::msg::GridMap grid_map_msg = *grid_map::GridMapRosConverter::toMessage(*map_ptr_);
