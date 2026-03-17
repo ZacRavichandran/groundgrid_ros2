@@ -8,7 +8,7 @@ struct GroundGridConfig
     double groundpatch_detection_minimum_threshold = 0.01;
     double distance_factor = 0.0001;
     double minimum_distance_factor = 0.0005;
-    double miminum_point_height_threshold = 0.3;
+    double miminum_point_height_threshold = 0.2;
     double minimum_point_height_obstacle_threshold = 0.1;
     double outlier_tolerance = 0.1;
     double ground_patch_detection_minimum_point_count_threshold = 0.25;
