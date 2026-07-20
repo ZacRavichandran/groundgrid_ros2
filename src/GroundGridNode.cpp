@@ -98,9 +98,33 @@ namespace groundgrid
             pcl::PointCloud<velodyne_pointcloud::PointXYZIR>::Ptr cloud(new pcl::PointCloud<velodyne_pointcloud::PointXYZIR>);
             pcl::fromROSMsg(*cloud_msg, *cloud);
 
-            // Map not initialized yet, this means the node hasn't received any odom message so far.
+            // Map not initialized yet, this means the node has not received any odom message so far.
             if (!map_ptr_)
                 return;
+
+            // GroundGrid publishes points in odom, so every transform used to
+            // create this cloud must describe the original sensor timestamp.
+            // Using TimePointZero (latest) and then retaining the old LiDAR
+            // stamp creates a cloud/TF mismatch that costmap message filters
+            // can reject as older than the transform cache.
+            geometry_msgs::msg::TransformStamped cloudMapToBaseTransform;
+            geometry_msgs::msg::TransformStamped cloudOriginTransform;
+            const rclcpp::Time cloudStamp(cloud_msg->header.stamp);
+            const rclcpp::Duration transformTimeout = rclcpp::Duration::from_seconds(0.5);
+
+            try
+            {
+                cloudMapToBaseTransform = mTfBuffer_.lookupTransform(
+                    "odom", "base_link", cloudStamp, transformTimeout);
+                cloudOriginTransform = mTfBuffer_.lookupTransform(
+                    "odom", "os_lidar", cloudStamp, transformTimeout);
+            }
+            catch (const tf2::TransformException &ex)
+            {
+                RCLCPP_WARN(this->get_logger(),
+                            "Dropping point cloud without timestamp-matched transforms: %s", ex.what());
+                return;
+            }
 
             geometry_msgs::msg::PointStamped origin;
             origin.header = cloud_msg->header;
@@ -109,7 +133,7 @@ namespace groundgrid
             origin.point.y = 0.0f;
             origin.point.z = 0.0f;
 
-            tf2::doTransform(origin, origin, cloudOriginTransform_);
+            tf2::doTransform(origin, origin, cloudOriginTransform);
 
             // Transform cloud into map coordinate system
             if (cloud_msg->header.frame_id != "odom")
@@ -122,8 +146,8 @@ namespace groundgrid
 
                 try
                 {
-                    mTfBuffer_.canTransform("odom", cloud_msg->header.frame_id, tf2::TimePointZero);
-                    transformStamped = mTfBuffer_.lookupTransform("odom", cloud_msg->header.frame_id, tf2::TimePointZero);
+                    transformStamped = mTfBuffer_.lookupTransform(
+                        "odom", cloud_msg->header.frame_id, cloudStamp, transformTimeout);
                 }
                 catch (const tf2::TransformException &ex)
                 {
@@ -133,7 +157,7 @@ namespace groundgrid
 
                 geometry_msgs::msg::PointStamped psIn;
                 psIn.header = cloud_msg->header;
-                psIn.header.frame_id = "odom";
+                psIn.header.frame_id = cloud_msg->header.frame_id;
 
                 for (const auto &point : cloud->points)
                 {
@@ -170,7 +194,7 @@ namespace groundgrid
 
             pcl::PointCloud<velodyne_pointcloud::PointXYZIR>::Ptr obstacle_cloud(new pcl::PointCloud<velodyne_pointcloud::PointXYZIR>);
             pcl::PointCloud<velodyne_pointcloud::PointXYZIR>::Ptr segmented_cloud =
-                ground_segmentation_.filter_cloud(cloud, origin_pclPoint, mapToBaseTransform_, *map_ptr_);
+                ground_segmentation_.filter_cloud(cloud, origin_pclPoint, cloudMapToBaseTransform, *map_ptr_);
 
             for (const auto &point : segmented_cloud->points)
             {
