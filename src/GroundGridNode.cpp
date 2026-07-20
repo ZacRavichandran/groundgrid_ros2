@@ -38,8 +38,35 @@ namespace groundgrid
         GroundGridNode(const rclcpp::NodeOptions &options) : Node("groundgrid_node", options),
                                                              mTfBuffer_(this->get_clock()), mTfListener_(mTfBuffer_)
         {
-	    this->declare_parameter("z_threshold", 1000.0);
-	    z_threshold = this->get_parameter("z_threshold").as_double();
+            this->declare_parameter("z_threshold", 1000.0);
+            this->declare_parameter("transform_timeout", 0.5);
+            this->declare_parameter("odom_topic", "dlio/odom_node/odom");
+            this->declare_parameter("pointcloud_topic", "ouster/points");
+            this->declare_parameter("grid_map_topic", "groundgrid/grid_map");
+            this->declare_parameter(
+                "segmented_cloud_topic", "groundgrid/segmented_cloud");
+            this->declare_parameter(
+                "obstacle_cloud_topic", "groundgrid/obstacle_cloud");
+            this->declare_parameter("odom_frame", "odom");
+            this->declare_parameter("base_frame", "base_link");
+            this->declare_parameter("lidar_frame", "os_lidar");
+            this->declare_parameter("utm_frame", "utm");
+
+            z_threshold = this->get_parameter("z_threshold").as_double();
+            transform_timeout_s_ =
+                this->get_parameter("transform_timeout").as_double();
+            odom_topic_ = this->get_parameter("odom_topic").as_string();
+            pointcloud_topic_ =
+                this->get_parameter("pointcloud_topic").as_string();
+            grid_map_topic_ = this->get_parameter("grid_map_topic").as_string();
+            segmented_cloud_topic_ =
+                this->get_parameter("segmented_cloud_topic").as_string();
+            obstacle_cloud_topic_ =
+                this->get_parameter("obstacle_cloud_topic").as_string();
+            odom_frame_ = this->get_parameter("odom_frame").as_string();
+            base_frame_ = this->get_parameter("base_frame").as_string();
+            lidar_frame_ = this->get_parameter("lidar_frame").as_string();
+            utm_frame_ = this->get_parameter("utm_frame").as_string();
 
             groundgrid_ = std::make_shared<GroundGrid>();
             ground_segmentation_.init(groundgrid_->mDimension, groundgrid_->mResolution);
@@ -48,16 +75,16 @@ namespace groundgrid
             // image_transport::ImageTransport it(shared_from_this());
             // grid_map_cv_img_pub_ = it.advertise("groundgrid/grid_map_cv", 1);
             // terrain_im_pub_ = it.advertise("groundgrid/terrain", 1);
-            grid_map_pub_ = this->create_publisher<grid_map_msgs::msg::GridMap>("groundgrid/grid_map", 1);
-            filtered_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("groundgrid/segmented_cloud", 1);
-            obstacle_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>("groundgrid/obstacle_cloud", 1);
+            grid_map_pub_ = this->create_publisher<grid_map_msgs::msg::GridMap>(grid_map_topic_, 1);
+            filtered_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(segmented_cloud_topic_, 1);
+            obstacle_cloud_pub_ = this->create_publisher<sensor_msgs::msg::PointCloud2>(obstacle_cloud_topic_, 1);
 
             pos_sub_ = this->create_subscription<nav_msgs::msg::Odometry>(
-                "dlio/odom_node/odom", 1, std::bind(&GroundGridNode::odom_callback, this, std::placeholders::_1));
+                odom_topic_, 1, std::bind(&GroundGridNode::odom_callback, this, std::placeholders::_1));
             auto point_cloud_qos = rclcpp::QoS(1);
             point_cloud_qos.reliability(RMW_QOS_POLICY_RELIABILITY_BEST_EFFORT);
             points_sub_ = this->create_subscription<sensor_msgs::msg::PointCloud2>(
-                "ouster/points", point_cloud_qos, std::bind(&GroundGridNode::points_callback, this, std::placeholders::_1));
+                pointcloud_topic_, point_cloud_qos, std::bind(&GroundGridNode::points_callback, this, std::placeholders::_1));
 
             rclcpp::TimerBase::SharedPtr timer = this->create_wall_timer(
                 std::chrono::milliseconds(100), std::bind(&GroundGridNode::transform_callback, this));
@@ -68,8 +95,8 @@ namespace groundgrid
         {
             try
             {
-                mapToBaseTransform_ = mTfBuffer_.lookupTransform("odom", "base_link", tf2::TimePointZero);
-                cloudOriginTransform_ = mTfBuffer_.lookupTransform("odom", "os_lidar", tf2::TimePointZero);
+                mapToBaseTransform_ = mTfBuffer_.lookupTransform(odom_frame_, base_frame_, tf2::TimePointZero);
+                cloudOriginTransform_ = mTfBuffer_.lookupTransform(odom_frame_, lidar_frame_, tf2::TimePointZero);
             }
             catch (const tf2::TransformException &ex)
             {
@@ -110,14 +137,14 @@ namespace groundgrid
             geometry_msgs::msg::TransformStamped cloudMapToBaseTransform;
             geometry_msgs::msg::TransformStamped cloudOriginTransform;
             const rclcpp::Time cloudStamp(cloud_msg->header.stamp);
-            const rclcpp::Duration transformTimeout = rclcpp::Duration::from_seconds(0.5);
+            const rclcpp::Duration transformTimeout = rclcpp::Duration::from_seconds(transform_timeout_s_);
 
             try
             {
                 cloudMapToBaseTransform = mTfBuffer_.lookupTransform(
-                    "odom", "base_link", cloudStamp, transformTimeout);
+                    odom_frame_, base_frame_, cloudStamp, transformTimeout);
                 cloudOriginTransform = mTfBuffer_.lookupTransform(
-                    "odom", "os_lidar", cloudStamp, transformTimeout);
+                    odom_frame_, lidar_frame_, cloudStamp, transformTimeout);
             }
             catch (const tf2::TransformException &ex)
             {
@@ -128,7 +155,7 @@ namespace groundgrid
 
             geometry_msgs::msg::PointStamped origin;
             origin.header = cloud_msg->header;
-            origin.header.frame_id = "os_lidar";
+            origin.header.frame_id = lidar_frame_;
             origin.point.x = 0.0f;
             origin.point.y = 0.0f;
             origin.point.z = 0.0f;
@@ -136,18 +163,18 @@ namespace groundgrid
             tf2::doTransform(origin, origin, cloudOriginTransform);
 
             // Transform cloud into map coordinate system
-            if (cloud_msg->header.frame_id != "odom")
+            if (cloud_msg->header.frame_id != odom_frame_)
             {
                 geometry_msgs::msg::TransformStamped transformStamped;
                 pcl::PointCloud<velodyne_pointcloud::PointXYZIR>::Ptr transformed_cloud(new pcl::PointCloud<velodyne_pointcloud::PointXYZIR>);
                 transformed_cloud->header = cloud->header;
-                transformed_cloud->header.frame_id = "odom";
+                transformed_cloud->header.frame_id = odom_frame_;
                 transformed_cloud->points.reserve(cloud->points.size());
 
                 try
                 {
                     transformStamped = mTfBuffer_.lookupTransform(
-                        "odom", cloud_msg->header.frame_id, cloudStamp, transformTimeout);
+                        odom_frame_, cloud_msg->header.frame_id, cloudStamp, transformTimeout);
                 }
                 catch (const tf2::TransformException &ex)
                 {
@@ -204,13 +231,13 @@ namespace groundgrid
 
             pcl::toROSMsg(*segmented_cloud, cloud_msg_out);
             cloud_msg_out.header = cloud_msg->header;
-            cloud_msg_out.header.frame_id = "odom";
+            cloud_msg_out.header.frame_id = odom_frame_;
             filtered_cloud_pub_->publish(cloud_msg_out);
 
             sensor_msgs::msg::PointCloud2 obstacle_msg_out;
             pcl::toROSMsg(*obstacle_cloud, obstacle_msg_out);
             obstacle_msg_out.header = cloud_msg->header;
-            obstacle_msg_out.header.frame_id = "odom";
+            obstacle_msg_out.header.frame_id = odom_frame_;
             obstacle_cloud_pub_->publish(obstacle_msg_out);
 
             end = std::chrono::steady_clock::now();
@@ -232,7 +259,7 @@ namespace groundgrid
             {
                 if (layer_pubs_.find(layer) == layer_pubs_.end())
                 {
-                    layer_pubs_[layer] = it.advertise("/groundgrid/grid_map_cv_" + layer, 1);
+                    layer_pubs_[layer] = it.advertise("groundgrid/grid_map_cv_" + layer, 1);
                 }
                 publish_grid_map_layer(layer_pubs_.at(layer), layer, cloud_msg->header.stamp);
             }
@@ -295,7 +322,7 @@ namespace groundgrid
 
                     try
                     {
-                        baseToUtmTransform = mTfBuffer_.lookupTransform("utm", "base_link", tf2::TimePointZero);
+                        baseToUtmTransform = mTfBuffer_.lookupTransform(utm_frame_, base_frame_, tf2::TimePointZero);
                     }
                     catch (const tf2::TransformException &ex)
                     {
@@ -304,7 +331,7 @@ namespace groundgrid
                     }
 
                     geometry_msgs::msg::PointStamped ps;
-                    ps.header.frame_id = "base_link";
+                    ps.header.frame_id = base_frame_;
                     ps.header.stamp = stamp;
                     tf2::doTransform(ps, ps, baseToUtmTransform);
 
@@ -343,7 +370,12 @@ namespace groundgrid
 
         geometry_msgs::msg::TransformStamped mapToBaseTransform_, cloudOriginTransform_;
 
-	double z_threshold;
+        std::string odom_topic_, pointcloud_topic_;
+        std::string grid_map_topic_, segmented_cloud_topic_, obstacle_cloud_topic_;
+        std::string odom_frame_, base_frame_, lidar_frame_, utm_frame_;
+
+        double z_threshold;
+        double transform_timeout_s_;
     };
 }
 

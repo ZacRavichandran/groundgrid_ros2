@@ -1,58 +1,75 @@
 from launch import LaunchDescription
-from launch_ros.descriptions import ComposableNode
-from launch.substitutions import LaunchConfiguration
 from launch.actions import DeclareLaunchArgument
-from launch_ros.actions import LoadComposableNodes
+from launch.substitutions import LaunchConfiguration
+from launch_ros.actions import Node
+
 
 def generate_launch_description():
-    namespace = LaunchConfiguration('namespace')
-    container_name = LaunchConfiguration('container_name', default='/ouster/os_container')
-    pointcloud_topic = LaunchConfiguration('pointcloud_topic', default='ouster/points')
-    z_threshold = LaunchConfiguration("z_threshold", default=1000.0)
+    namespace = LaunchConfiguration("namespace")
 
-    declare_namespace_arg = DeclareLaunchArgument(
-        'namespace',
-        default_value='j100_0000',
-        description='Namespace for all nodes and topics'
+    node = Node(
+        package="groundgrid",
+        executable="groundgrid_node",
+        name="groundgrid_node",
+        namespace=namespace,
+        output="screen",
+        parameters=[
+            {
+                "use_sim_time": LaunchConfiguration("use_sim_time"),
+                "z_threshold": LaunchConfiguration("z_threshold"),
+                "transform_timeout": LaunchConfiguration("transform_timeout"),
+                "odom_topic": LaunchConfiguration("odom_topic"),
+                "pointcloud_topic": LaunchConfiguration("pointcloud_topic"),
+                "grid_map_topic": LaunchConfiguration("grid_map_topic"),
+                "segmented_cloud_topic": LaunchConfiguration(
+                    "segmented_cloud_topic"
+                ),
+                "obstacle_cloud_topic": LaunchConfiguration(
+                    "obstacle_cloud_topic"
+                ),
+                "odom_frame": LaunchConfiguration("odom_frame"),
+                "base_frame": LaunchConfiguration("base_frame"),
+                "lidar_frame": LaunchConfiguration("lidar_frame"),
+                "utm_frame": LaunchConfiguration("utm_frame"),
+            }
+        ],
     )
 
-    declare_container_name_arg = DeclareLaunchArgument(
-        'container_name',
-        default_value=container_name,
-        description='Name of the container to load nodes into'
-    )
-    declare_pointcloud_topic_arg = DeclareLaunchArgument(
-        'pointcloud_topic',
-        default_value=pointcloud_topic,
-        description='Pointcloud topic name'
-    )
-    declare_z_threshold_arg = DeclareLaunchArgument(
-        "z_threshold",
-        default_value="1000.0",
-        description="filter points above this height"
-    )
-
-
-    load_composable_nodes = LoadComposableNodes(
-        target_container=[namespace, container_name],
-        composable_node_descriptions=[
-            ComposableNode(
-                package='groundgrid',
-                plugin='groundgrid::GroundGridNode',
-                name='groundgrid_node',
-                namespace=namespace,
-                remappings=[
-                    ('/sensors/velodyne_points', pointcloud_topic)
-                ],
-                parameters=[{"z_threshold": z_threshold}]
-            )
+    return LaunchDescription(
+        [
+            DeclareLaunchArgument("namespace", default_value=""),
+            DeclareLaunchArgument("use_sim_time", default_value="false"),
+            DeclareLaunchArgument("z_threshold", default_value="1000.0"),
+            DeclareLaunchArgument("transform_timeout", default_value="0.5"),
+            DeclareLaunchArgument(
+                "odom_topic", default_value="dlio/odom_node/odom"
+            ),
+            DeclareLaunchArgument(
+                "pointcloud_topic", default_value="ouster/points"
+            ),
+            DeclareLaunchArgument(
+                "grid_map_topic", default_value="groundgrid/grid_map"
+            ),
+            DeclareLaunchArgument(
+                "segmented_cloud_topic",
+                default_value="groundgrid/segmented_cloud",
+            ),
+            DeclareLaunchArgument(
+                "obstacle_cloud_topic",
+                default_value="groundgrid/obstacle_cloud",
+            ),
+            DeclareLaunchArgument("odom_frame", default_value="odom"),
+            DeclareLaunchArgument("base_frame", default_value="base_link"),
+            DeclareLaunchArgument("lidar_frame", default_value="os_lidar"),
+            DeclareLaunchArgument("utm_frame", default_value="utm"),
+            DeclareLaunchArgument(
+                "container_name",
+                default_value="",
+                description=(
+                    "Deprecated compatibility argument; GroundGrid now runs "
+                    "in its own process"
+                ),
+            ),
+            node,
         ]
     )
-
-    return LaunchDescription([
-        declare_namespace_arg,
-        declare_pointcloud_topic_arg,
-        declare_container_name_arg,
-        declare_z_threshold_arg,
-        load_composable_nodes,
-    ])
